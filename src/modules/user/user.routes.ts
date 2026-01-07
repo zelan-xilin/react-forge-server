@@ -22,5 +22,5 @@ userRoutes.get("/page", permissionGuard("user:read"), userController.page);
 userRoutes.get(
   "/:id",
   permissionGuard("user:read"),
-  userController.getUserById
+  userController.getUserByUserId
 );

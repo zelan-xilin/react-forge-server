@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, like } from "drizzle-orm";
 import { db } from "../../db";
 import { role, roleActionPermission, rolePathPermission } from "./role.schema";
 import {
@@ -17,23 +17,6 @@ export const roleService = {
     });
   },
 
-  delete(id: number) {
-    return db.delete(role).where(eq(role.id, id));
-  },
-
-  list() {
-    return db.select().from(role);
-  },
-
-  page(data: PageQueryDTO) {
-    return db
-      .select()
-      .from(role)
-      .where(data.name ? eq(role.name, data.name) : undefined)
-      .limit(data.pageSize)
-      .offset((data.page - 1) * data.pageSize);
-  },
-
   update(id: number, data: UpdateRoleDTO) {
     const updateData: UpdateRoleData = {
       updatedBy: data.userId,
@@ -50,7 +33,31 @@ export const roleService = {
     return db.update(role).set(updateData).where(eq(role.id, id));
   },
 
-  async setPathPermissions(roleId: number, paths: string[]) {
+  delete(id: number) {
+    return db.delete(role).where(eq(role.id, id));
+  },
+
+  list() {
+    return db.select().from(role).orderBy(desc(role.createdAt));
+  },
+
+  page(data: PageQueryDTO) {
+    const conditions = [];
+
+    if (data.name) {
+      conditions.push(like(role.name, `%${data.name}%`));
+    }
+
+    return db
+      .select()
+      .from(role)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(role.createdAt))
+      .limit(data.pageSize)
+      .offset((data.page - 1) * data.pageSize);
+  },
+
+  async setPathPermissionsByRoleId(roleId: number, paths: string[]) {
     await db
       .delete(rolePathPermission)
       .where(eq(rolePathPermission.roleId, roleId));
@@ -62,7 +69,7 @@ export const roleService = {
     }
   },
 
-  async getPathPermissions(roleId: number) {
+  async getPathPermissionsByRoleId(roleId: number) {
     const list = await db
       .select()
       .from(rolePathPermission)
@@ -70,7 +77,7 @@ export const roleService = {
     return list.map((i) => i.path);
   },
 
-  async setActionPermissions(
+  async setActionPermissionsByRoleId(
     roleId: number,
     permissions: { module: string; action: string }[]
   ) {
@@ -89,7 +96,7 @@ export const roleService = {
     }
   },
 
-  async getActionPermissions(roleId: number) {
+  async getActionPermissionsByRoleId(roleId: number) {
     const list = await db
       .select()
       .from(roleActionPermission)

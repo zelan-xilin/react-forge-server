@@ -12,11 +12,11 @@ const UpdateRoleDTO = z.object({
   description: z.string().max(200).optional(),
 });
 
-const SetPathPermissionsDTO = z.object({
+const SetPathPermissionsByRoleIdDTO = z.object({
   paths: z.array(z.string()),
 });
 
-const SetActionPermissionsDTO = z.object({
+const SetActionPermissionsByRoleIdDTO = z.object({
   permissions: z.array(
     z.object({
       module: z.string(),
@@ -85,8 +85,8 @@ export const roleController = {
     res.json(data);
   },
 
-  async setPathPermissions(req: Request, res: Response) {
-    const parsed = SetPathPermissionsDTO.safeParse(req.body);
+  async setPathPermissionsByRoleId(req: Request, res: Response) {
+    const parsed = SetPathPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
         errors: parsed.error.issues.map((issue) => ({
@@ -96,20 +96,22 @@ export const roleController = {
       });
     }
 
-    await roleService.setPathPermissions(
+    await roleService.setPathPermissionsByRoleId(
       Number(req.params.id),
       parsed.data.paths
     );
     res.json({ success: true });
   },
 
-  async getPathPermissions(req: Request, res: Response) {
-    const data = await roleService.getPathPermissions(Number(req.params.id));
+  async getPathPermissionsByRoleId(req: Request, res: Response) {
+    const data = await roleService.getPathPermissionsByRoleId(
+      Number(req.params.id)
+    );
     res.json(data);
   },
 
-  async setActionPermissions(req: Request, res: Response) {
-    const parsed = SetActionPermissionsDTO.safeParse(req.body);
+  async setActionPermissionsByRoleId(req: Request, res: Response) {
+    const parsed = SetActionPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
         errors: parsed.error.issues.map((issue) => ({
@@ -119,15 +121,17 @@ export const roleController = {
       });
     }
 
-    await roleService.setActionPermissions(
+    await roleService.setActionPermissionsByRoleId(
       Number(req.params.id),
       parsed.data.permissions
     );
     res.json({ success: true });
   },
 
-  async getActionPermissions(req: Request, res: Response) {
-    const data = await roleService.getActionPermissions(Number(req.params.id));
+  async getActionPermissionsByRoleId(req: Request, res: Response) {
+    const data = await roleService.getActionPermissionsByRoleId(
+      Number(req.params.id)
+    );
     res.json(data);
   },
 };

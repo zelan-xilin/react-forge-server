@@ -14,14 +14,16 @@ export async function authGuard(
   try {
     const { uid } = authService.verify(token);
 
-    const userData = await userService.getUserById(uid);
+    const userData = await userService.getUserByUserId(uid);
     if (!userData) {
       return res.status(401).json({ error: "User not found" });
     }
 
     let actions: string[] = [];
     if (userData.roleId && userData.isAdmin !== 1) {
-      const perms = await roleService.getActionPermissions(userData.roleId);
+      const perms = await roleService.getActionPermissionsByRoleId(
+        userData.roleId
+      );
       actions = perms.map((p) => `${p.module}:${p.action}`);
     }
 

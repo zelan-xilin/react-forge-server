@@ -23,6 +23,17 @@ roleRoutes.get("/page", permissionGuard("role:read"), roleController.page);
 roleRoutes.put(
   "/:id/route",
   permissionGuard("role:update"),
-  roleController.setPathPermissions
+  roleController.setPathPermissionsByRoleId
 );
-roleRoutes.get("/:id/route", roleController.getPathPermissions);
+roleRoutes.get("/:id/route", roleController.getPathPermissionsByRoleId);
+
+roleRoutes.put(
+  "/:id/permission",
+  permissionGuard("role:update"),
+  roleController.setActionPermissionsByRoleId
+);
+roleRoutes.get(
+  "/:id/permission",
+  permissionGuard("role:read"),
+  roleController.getActionPermissionsByRoleId
+);

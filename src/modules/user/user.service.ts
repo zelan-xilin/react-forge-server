@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { and, eq, like } from "drizzle-orm";
+import { and, desc, eq, like } from "drizzle-orm";
 import { db } from "../../db";
 import {
   CreateUserDTO,
@@ -52,7 +52,7 @@ export const userService = {
   },
 
   async list() {
-    return db.select().from(user);
+    return db.select().from(user).orderBy(desc(user.createdAt));
   },
 
   async page(data: PageQueryDTO) {
@@ -72,6 +72,7 @@ export const userService = {
       .select()
       .from(user)
       .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(user.createdAt))
       .limit(data.pageSize)
       .offset((data.page - 1) * data.pageSize);
   },
@@ -83,7 +84,7 @@ export const userService = {
     return ok ? u[0] : null;
   },
 
-  async getUserById(id: number) {
+  async getUserByUserId(id: number) {
     const result = await db.select().from(user).where(eq(user.id, id)).limit(1);
     return result[0] || null;
   },
