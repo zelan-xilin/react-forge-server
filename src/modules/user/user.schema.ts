@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm"
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -9,9 +9,10 @@ export const user = sqliteTable("user", {
   status: integer("status").notNull().default(1),
   description: text("description"),
   createdBy: integer("created_by"),
-  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
   updatedBy: integer("updated_by"),
-  updatedAt: integer("updated_at", { mode: 'timestamp' }),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
   isAdmin: integer("is_admin").default(0),
-})
-
+});
