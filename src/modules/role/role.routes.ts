@@ -1,20 +1,28 @@
-import { Router } from "express"
-import { authGuard } from "../../middleware/auth.guard"
-import { permissionGuard } from "../../middleware/permission.guard"
-import { roleController } from "./role.controller"
+import { Router } from "express";
+import { authGuard } from "../../middleware/auth.guard";
+import { permissionGuard } from "../../middleware/permission.guard";
+import { roleController } from "./role.controller";
 
-export const roleRoutes = Router()
+export const roleRoutes = Router();
 
-roleRoutes.use(authGuard)
+roleRoutes.use(authGuard);
 
-roleRoutes.post("/", permissionGuard("role:create"), roleController.create)
+roleRoutes.post("/", permissionGuard("role:create"), roleController.create);
 
-roleRoutes.delete("/:id", permissionGuard("role:delete"), roleController.delete)
+roleRoutes.delete(
+  "/:id",
+  permissionGuard("role:delete"),
+  roleController.delete
+);
 
-roleRoutes.put("/:id", permissionGuard("role:update"), roleController.update)
+roleRoutes.put("/:id", permissionGuard("role:update"), roleController.update);
 
-roleRoutes.get("/list", permissionGuard("role:read"), roleController.list)
-roleRoutes.get("/page", permissionGuard("role:read"), roleController.page)
+roleRoutes.get("/list", permissionGuard("role:read"), roleController.list);
+roleRoutes.get("/page", permissionGuard("role:read"), roleController.page);
 
-roleRoutes.put("/:id/route", permissionGuard("role:update"), roleController.setRoutePermissions)
-roleRoutes.get("/:id/route", roleController.getRoutePermissions)
+roleRoutes.put(
+  "/:id/route",
+  permissionGuard("role:update"),
+  roleController.setPathPermissions
+);
+roleRoutes.get("/:id/route", roleController.getPathPermissions);

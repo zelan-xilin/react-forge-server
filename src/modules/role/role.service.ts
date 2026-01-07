@@ -1,23 +1,28 @@
-import { eq } from "drizzle-orm"
-import { db } from "../../db"
-import { role, roleCrudPermission, roleRoutePermission } from "./role.schema"
-import { CreateRoleDTO, PageQueryDTO, UpdateRoleData, UpdateRoleDTO } from "./types"
+import { eq } from "drizzle-orm";
+import { db } from "../../db";
+import { role, roleActionPermission, rolePathPermission } from "./role.schema";
+import {
+  CreateRoleDTO,
+  PageQueryDTO,
+  UpdateRoleData,
+  UpdateRoleDTO,
+} from "./types";
 
 export const roleService = {
   create(data: CreateRoleDTO) {
     return db.insert(role).values({
       name: data.name,
       description: data.description,
-      createdBy: data.userId
-    })
+      createdBy: data.userId,
+    });
   },
 
   delete(id: number) {
-    return db.delete(role).where(eq(role.id, id))
+    return db.delete(role).where(eq(role.id, id));
   },
 
   list() {
-    return db.select().from(role)
+    return db.select().from(role);
   },
 
   page(data: PageQueryDTO) {
@@ -26,61 +31,69 @@ export const roleService = {
       .from(role)
       .where(data.name ? eq(role.name, data.name) : undefined)
       .limit(data.pageSize)
-      .offset((data.page - 1) * data.pageSize)
+      .offset((data.page - 1) * data.pageSize);
   },
 
   update(id: number, data: UpdateRoleDTO) {
     const updateData: UpdateRoleData = {
       updatedBy: data.userId,
       updatedAt: new Date(),
-    }
+    };
 
     if (data.name !== undefined) {
-      updateData.name = data.name
+      updateData.name = data.name;
     }
     if (data.description !== undefined) {
-      updateData.description = data.description
+      updateData.description = data.description;
     }
 
-    return db
-      .update(role)
-      .set(updateData)
-      .where(eq(role.id, id))
+    return db.update(role).set(updateData).where(eq(role.id, id));
   },
 
-  async setRoutePermissions(roleId: number, paths: string[]) {
-    await db.delete(roleRoutePermission).where(eq(roleRoutePermission.roleId, roleId))
+  async setPathPermissions(roleId: number, paths: string[]) {
+    await db
+      .delete(rolePathPermission)
+      .where(eq(rolePathPermission.roleId, roleId));
 
     if (paths.length) {
-      await db.insert(roleRoutePermission).values(
-        paths.map(p => ({ roleId, path: p }))
-      )
+      await db
+        .insert(rolePathPermission)
+        .values(paths.map((p) => ({ roleId, path: p })));
     }
   },
 
-  async getRoutePermissions(roleId: number) {
+  async getPathPermissions(roleId: number) {
     const list = await db
       .select()
-      .from(roleRoutePermission)
-      .where(eq(roleRoutePermission.roleId, roleId))
-    return list.map(i => i.path)
+      .from(rolePathPermission)
+      .where(eq(rolePathPermission.roleId, roleId));
+    return list.map((i) => i.path);
   },
 
-  async setRoleCrudPermissions(roleId: number, permissions: { module: string; action?: string }[]) {
-    await db.delete(roleCrudPermission).where(eq(roleCrudPermission.roleId, roleId))
+  async setActionPermissions(
+    roleId: number,
+    permissions: { module: string; action: string }[]
+  ) {
+    await db
+      .delete(roleActionPermission)
+      .where(eq(roleActionPermission.roleId, roleId));
 
     if (permissions.length) {
-      await db.insert(roleCrudPermission).values(
-        permissions.map(p => ({ roleId, module: p.module, action: p.action }))
-      )
+      await db.insert(roleActionPermission).values(
+        permissions.map((p) => ({
+          roleId,
+          module: p.module,
+          action: p.action,
+        }))
+      );
     }
   },
 
-  async getRoleCrudPermissions(roleId: number) {
+  async getActionPermissions(roleId: number) {
     const list = await db
       .select()
-      .from(roleCrudPermission)
-      .where(eq(roleCrudPermission.roleId, roleId))
-    return list.map(i => ({ module: i.module, action: i.action }))
-  }
-}
+      .from(roleActionPermission)
+      .where(eq(roleActionPermission.roleId, roleId));
+    return list.map((i) => ({ module: i.module, action: i.action }));
+  },
+};

@@ -1,9 +1,9 @@
-import Database from "better-sqlite3"
-import { drizzle } from "drizzle-orm/better-sqlite3"
-import './schema'
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import "./schema";
 
-export const sqlite = new Database("rbac.db")
-export const db = drizzle(sqlite)
+export const sqlite = new Database("rbac.db");
+export const db = drizzle(sqlite);
 
 export function initDb() {
   sqlite.exec(`
@@ -17,17 +17,17 @@ export function initDb() {
       updated_at INTEGER
     );
 
-    CREATE TABLE IF NOT EXISTS role_route_permission (
+    CREATE TABLE IF NOT EXISTS role_path_permission (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       role_id INTEGER NOT NULL,
       path TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS role_crud_permission (
+    CREATE TABLE IF NOT EXISTS role_action_permission (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       role_id INTEGER NOT NULL,
       module TEXT NOT NULL,
-      action TEXT
+      action TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS user (
