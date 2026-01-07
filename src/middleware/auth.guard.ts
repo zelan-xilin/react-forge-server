@@ -1,9 +1,7 @@
-import { eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
-import { db } from "../db";
+import { roleService } from "modules/role/role.service";
+import { userService } from "modules/user/user.service";
 import { authService } from "../modules/auth/auth.service";
-import { roleActionPermission } from "../modules/role/role.schema";
-import { user } from "../modules/user/user.schema";
 
 export async function authGuard(
   req: Request,
@@ -16,30 +14,23 @@ export async function authGuard(
   try {
     const { uid } = authService.verify(token);
 
-    const userData = await db
-      .select()
-      .from(user)
-      .where(eq(user.id, uid))
-      .limit(1);
-    if (!userData.length) {
+    const userData = await userService.getUserById(uid);
+    if (!userData) {
       return res.status(401).json({ error: "User not found" });
     }
 
     let actions: string[] = [];
-    if (userData[0].roleId && userData[0].isAdmin !== 1) {
-      const perms = await db
-        .select()
-        .from(roleActionPermission)
-        .where(eq(roleActionPermission.roleId, userData[0].roleId));
+    if (userData.roleId && userData.isAdmin !== 1) {
+      const perms = await roleService.getActionPermissions(userData.roleId);
       actions = perms.map((p) => `${p.module}:${p.action}`);
     }
 
     req.user = {
-      userId: userData[0].id,
-      username: userData[0].username,
-      roleId: userData[0].roleId,
-      status: userData[0].status,
-      isAdmin: userData[0].isAdmin ?? 0,
+      userId: userData.id,
+      username: userData.username,
+      roleId: userData.roleId,
+      status: userData.status,
+      isAdmin: userData.isAdmin ?? 0,
       actions,
     };
 

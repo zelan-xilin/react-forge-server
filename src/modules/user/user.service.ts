@@ -83,7 +83,7 @@ export const userService = {
     return ok ? u[0] : null;
   },
 
-  async getById(id: number) {
+  async getUserById(id: number) {
     const result = await db.select().from(user).where(eq(user.id, id)).limit(1);
     return result[0] || null;
   },
