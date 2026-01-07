@@ -11,8 +11,15 @@ export const role = sqliteTable("role", {
   updatedAt: integer("updated_at", { mode: 'timestamp' }),
 })
 
-export const rolePermission = sqliteTable("role_permission", {
+export const roleRoutePermission = sqliteTable("role_route_permission", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   roleId: integer("role_id").notNull(),
   path: text("path").notNull(),
+})
+
+export const roleCrudPermission = sqliteTable("role_crud_permission", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  roleId: integer("role_id").notNull(),
+  module: text("module").notNull(),
+  action: text("action"),
 })

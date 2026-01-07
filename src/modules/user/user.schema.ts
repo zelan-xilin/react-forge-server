@@ -12,5 +12,6 @@ export const user = sqliteTable("user", {
   createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
   updatedBy: integer("updated_by"),
   updatedAt: integer("updated_at", { mode: 'timestamp' }),
+  isAdmin: integer("is_admin").default(0),
 })
 

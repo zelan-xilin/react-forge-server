@@ -12,7 +12,7 @@ const UpdateRoleDTO = z.object({
   description: z.string().max(200).optional(),
 })
 
-const SetPermissionsDTO = z.object({
+const SetRoutePermissionsDTO = z.object({
   paths: z.array(z.string()),
 })
 
@@ -73,8 +73,8 @@ export const roleController = {
     res.json(data)
   },
 
-  async setPermissions(req: Request, res: Response) {
-    const parsed = SetPermissionsDTO.safeParse(req.body)
+  async setRoutePermissions(req: Request, res: Response) {
+    const parsed = SetRoutePermissionsDTO.safeParse(req.body)
     if (!parsed.success) {
       return res.status(400).json({
         errors: parsed.error.issues.map(issue => ({
@@ -84,12 +84,12 @@ export const roleController = {
       })
     }
 
-    await roleService.setPermissions(Number(req.params.id), parsed.data.paths)
+    await roleService.setRoutePermissions(Number(req.params.id), parsed.data.paths)
     res.json({ success: true })
   },
 
-  async getPermissions(req: Request, res: Response) {
-    const data = await roleService.getPermissions(Number(req.params.id))
+  async getRoutePermissions(req: Request, res: Response) {
+    const data = await roleService.getRoutePermissions(Number(req.params.id))
     res.json(data)
   },
 }

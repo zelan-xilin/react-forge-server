@@ -17,10 +17,17 @@ export function initDb() {
       updated_at INTEGER
     );
 
-    CREATE TABLE IF NOT EXISTS role_permission (
+    CREATE TABLE IF NOT EXISTS role_route_permission (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       role_id INTEGER NOT NULL,
       path TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS role_crud_permission (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      role_id INTEGER NOT NULL,
+      module TEXT NOT NULL,
+      action TEXT
     );
 
     CREATE TABLE IF NOT EXISTS user (
@@ -33,7 +40,8 @@ export function initDb() {
       created_by INTEGER,
       created_at INTEGER NOT NULL DEFAULT (unixepoch()),
       updated_by INTEGER,
-      updated_at INTEGER
+      updated_at INTEGER,
+      is_admin INTEGER DEFAULT 0
     );
   `);
 

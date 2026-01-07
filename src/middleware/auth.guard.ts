@@ -25,6 +25,7 @@ export async function authGuard(
       username: userData[0].username,
       roleId: userData[0].roleId,
       status: userData[0].status,
+      isAdmin: userData[0].isAdmin ?? 0,
     }
 
     next()

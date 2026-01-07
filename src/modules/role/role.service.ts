@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm"
 import { db } from "../../db"
-import { role, rolePermission } from "./role.schema"
+import { role, roleCrudPermission, roleRoutePermission } from "./role.schema"
 import { CreateRoleDTO, PageQueryDTO, UpdateRoleData, UpdateRoleDTO } from "./types"
 
 export const roleService = {
@@ -48,22 +48,39 @@ export const roleService = {
       .where(eq(role.id, id))
   },
 
-  async setPermissions(roleId: number, paths: string[]) {
-    await db.delete(rolePermission).where(eq(rolePermission.roleId, roleId))
+  async setRoutePermissions(roleId: number, paths: string[]) {
+    await db.delete(roleRoutePermission).where(eq(roleRoutePermission.roleId, roleId))
 
     if (paths.length) {
-      await db.insert(rolePermission).values(
+      await db.insert(roleRoutePermission).values(
         paths.map(p => ({ roleId, path: p }))
       )
     }
   },
 
-  async getPermissions(roleId: number) {
+  async getRoutePermissions(roleId: number) {
     const list = await db
       .select()
-      .from(rolePermission)
-      .where(eq(rolePermission.roleId, roleId))
-
+      .from(roleRoutePermission)
+      .where(eq(roleRoutePermission.roleId, roleId))
     return list.map(i => i.path)
   },
+
+  async setRoleCrudPermissions(roleId: number, permissions: { module: string; action?: string }[]) {
+    await db.delete(roleCrudPermission).where(eq(roleCrudPermission.roleId, roleId))
+
+    if (permissions.length) {
+      await db.insert(roleCrudPermission).values(
+        permissions.map(p => ({ roleId, module: p.module, action: p.action }))
+      )
+    }
+  },
+
+  async getRoleCrudPermissions(roleId: number) {
+    const list = await db
+      .select()
+      .from(roleCrudPermission)
+      .where(eq(roleCrudPermission.roleId, roleId))
+    return list.map(i => ({ module: i.module, action: i.action }))
+  }
 }

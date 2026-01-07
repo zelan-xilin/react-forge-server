@@ -6,9 +6,11 @@ declare global {
         username: string;
         roleId: number | null;
         status: number;
+        isAdmin: number;
       }
     }
   }
 }
 
 export { };
+
