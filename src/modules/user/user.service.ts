@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { and, desc, eq, like } from "drizzle-orm";
+import { and, count, desc, eq, like } from "drizzle-orm";
 import { db } from "../../db";
 import {
   CreateUserDTO,
@@ -68,13 +68,23 @@ export const userService = {
       conditions.push(eq(user.status, data.status));
     }
 
-    return db
+
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(user)
+      .where(whereClause);
+
+    const list = await db
       .select()
       .from(user)
-      .where(conditions.length ? and(...conditions) : undefined)
+      .where(whereClause)
       .orderBy(desc(user.createdAt))
       .limit(data.pageSize)
       .offset((data.page - 1) * data.pageSize);
+
+    return { list, total };
   },
 
   async validate(username: string, password: string) {

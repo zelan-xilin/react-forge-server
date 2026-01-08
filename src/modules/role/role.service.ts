@@ -1,4 +1,4 @@
-import { and, desc, eq, like } from "drizzle-orm";
+import { and, count, desc, eq, like } from "drizzle-orm";
 import { db } from "../../db";
 import { role, roleActionPermission, rolePathPermission } from "./role.schema";
 import {
@@ -41,20 +41,29 @@ export const roleService = {
     return db.select().from(role).orderBy(desc(role.createdAt));
   },
 
-  page(data: PageQueryDTO) {
+  async page(data: PageQueryDTO) {
     const conditions = [];
 
     if (data.name) {
       conditions.push(like(role.name, `%${data.name}%`));
     }
 
-    return db
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(role)
+      .where(whereClause);
+
+    const list = await db
       .select()
       .from(role)
-      .where(conditions.length ? and(...conditions) : undefined)
+      .where(whereClause)
       .orderBy(desc(role.createdAt))
       .limit(data.pageSize)
       .offset((data.page - 1) * data.pageSize);
+
+    return { list, total };
   },
 
   async setPathPermissionsByRoleId(roleId: number, paths: string[]) {

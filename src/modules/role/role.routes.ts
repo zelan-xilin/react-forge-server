@@ -7,7 +7,11 @@ export const roleRoutes = Router();
 
 roleRoutes.use(authGuard);
 
-roleRoutes.post("/", permissionGuard("role:create"), roleController.create);
+roleRoutes.post(
+  "/",
+  permissionGuard("role:create"),
+  roleController.create
+);
 
 roleRoutes.delete(
   "/:id",
@@ -15,25 +19,40 @@ roleRoutes.delete(
   roleController.delete
 );
 
-roleRoutes.put("/:id", permissionGuard("role:update"), roleController.update);
+roleRoutes.put(
+  "/:id",
+  permissionGuard("role:update"),
+  roleController.update
+);
 
-roleRoutes.get("/list", permissionGuard("role:read"), roleController.list);
-roleRoutes.get("/page", permissionGuard("role:read"), roleController.page);
+roleRoutes.get(
+  "/list",
+  permissionGuard("role:read"),
+  roleController.list
+);
+roleRoutes.get(
+  "/page",
+  permissionGuard("role:read"),
+  roleController.page
+);
 
 roleRoutes.put(
-  "/:id/route",
+  "/:id/path",
   permissionGuard("role:update"),
   roleController.setPathPermissionsByRoleId
 );
-roleRoutes.get("/:id/route", roleController.getPathPermissionsByRoleId);
+roleRoutes.get(
+  "/:id/path",
+  roleController.getPathPermissionsByRoleId
+);
 
 roleRoutes.put(
-  "/:id/permission",
+  "/:id/action",
   permissionGuard("role:update"),
   roleController.setActionPermissionsByRoleId
 );
 roleRoutes.get(
-  "/:id/permission",
+  "/:id/action",
   permissionGuard("role:read"),
   roleController.getActionPermissionsByRoleId
 );

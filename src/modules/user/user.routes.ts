@@ -7,9 +7,17 @@ export const userRoutes = Router();
 
 userRoutes.use(authGuard);
 
-userRoutes.post("/", permissionGuard("user:create"), userController.create);
+userRoutes.post(
+  "/",
+  permissionGuard("user:create"),
+  userController.create
+);
 
-userRoutes.put("/:id", permissionGuard("user:update"), userController.update);
+userRoutes.put(
+  "/:id",
+  permissionGuard("user:update"),
+  userController.update
+);
 
 userRoutes.delete(
   "/:id",
@@ -17,8 +25,14 @@ userRoutes.delete(
   userController.delete
 );
 
-userRoutes.get("/list", permissionGuard("user:read"), userController.list);
-userRoutes.get("/page", permissionGuard("user:read"), userController.page);
+userRoutes.get(
+  "/list",
+  permissionGuard("user:read"),
+  userController.list);
+userRoutes.get(
+  "/page",
+  permissionGuard("user:read"),
+  userController.page);
 userRoutes.get(
   "/:id",
   permissionGuard("user:read"),
