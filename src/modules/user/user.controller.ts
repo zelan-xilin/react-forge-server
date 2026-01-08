@@ -184,9 +184,10 @@ export const userController = {
 
     if (!data) {
       return res
-        .status(404)
+        .status(200)
         .json({
-          message: "用户不存在"
+          message: "查询成功",
+          data: null
         });
     }
 

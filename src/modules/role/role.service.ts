@@ -15,6 +15,7 @@ export const roleService = {
       name: data.name,
       description: data.description,
       createdBy: data.userId,
+      status: data.status ?? 1,
     });
   },
 
@@ -27,6 +28,9 @@ export const roleService = {
 
     if (data.name !== undefined) {
       updateData.name = data.name;
+    }
+    if (data.status !== undefined) {
+      updateData.status = data.status;
     }
     if (data.description !== undefined) {
       updateData.description = data.description;
@@ -51,6 +55,9 @@ export const roleService = {
 
     if (data.name) {
       conditions.push(like(role.name, `%${data.name}%`));
+    }
+    if (data.status !== undefined) {
+      conditions.push(eq(role.status, data.status));
     }
 
     const whereClause = conditions.length ? and(...conditions) : undefined;
@@ -82,6 +89,12 @@ export const roleService = {
       .from(role)
       .where(and(...conditions));
     return countResult[0].count > 0;
+  },
+
+  /** 根据角色ID获取角色 */
+  async getRoleByRoleId(id: number) {
+    const result = await db.select().from(role).where(eq(role.id, id)).limit(1);
+    return result[0] || null;
   },
 
   /** 设置角色路径权限 */

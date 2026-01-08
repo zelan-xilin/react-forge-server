@@ -5,11 +5,13 @@ import { roleService } from "./role.service";
 const CreateRoleDTO = z.object({
   name: z.string().min(1, "角色名不能为空").max(50, "角色名不能超过50个字符"),
   description: z.string().max(200, "描述不能超过200个字符").optional(),
+  status: z.number().int().min(0).max(1).optional(),
 });
 
 const UpdateRoleDTO = z.object({
   name: z.string().min(1).max(50).optional(),
   description: z.string().max(200).optional(),
+  status: z.number().int().min(0).max(1).optional(),
 });
 
 const SetPathPermissionsByRoleIdDTO = z.object({
@@ -103,13 +105,13 @@ export const roleController = {
 
   /** 角色分页 */
   async page(req: Request, res: Response) {
-    const page = Number(req.query.page) || 1;
-    const pageSize = Number(req.query.pageSize) || 10;
-    const name =
-      typeof req.query.name === "string" && req.query.name
-        ? req.query.name
-        : undefined;
-    const data = await roleService.page({ name, page, pageSize });
+    const query = {
+      name: req.query.name as string | undefined,
+      status: req.query.status ? Number(req.query.status) : undefined,
+      page: req.query.page ? Number(req.query.page) : 1,
+      pageSize: req.query.pageSize ? Number(req.query.pageSize) : 10,
+    };
+    const data = await roleService.page(query);
     res
       .status(200)
       .json({
@@ -130,6 +132,17 @@ export const roleController = {
       .json({
         message: "查询成功",
         data: { exists }
+      });
+  },
+
+  /** 根据角色ID获取角色 */
+  async getRoleByRoleId(req: Request, res: Response) {
+    const data = await roleService.getRoleByRoleId(Number(req.params.id));
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data
       });
   },
 

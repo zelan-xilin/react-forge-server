@@ -49,6 +49,13 @@ roleRoutes.get(
   roleController.isRoleNameExists
 );
 
+/** 根据角色ID获取角色 */
+roleRoutes.get(
+  "/:id",
+  permissionGuard("role:read"),
+  roleController.getRoleByRoleId
+);
+
 /** 设置角色路径权限 */
 roleRoutes.put(
   "/:id/path",

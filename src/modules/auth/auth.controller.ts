@@ -47,14 +47,20 @@ export const authController = {
         });
     }
 
+    let role: { status: number } | null = null
     let actions: { module: string; action: string; }[] = []
     let paths: string[] = []
     if (user.roleId && user.isAdmin !== 1) {
       try {
-        [actions, paths] = await Promise.all([
+        [role, actions, paths] = await Promise.all([
+          roleService.getRoleByRoleId(user.roleId),
           roleService.getActionPermissionsByRoleId(user.roleId),
           roleService.getPathPermissionsByRoleId(user.roleId),
         ]);
+        if (!role || role.status !== 1) {
+          actions = [];
+          paths = [];
+        }
       } catch (error) {
         console.error('查询权限失败:', error);
       }

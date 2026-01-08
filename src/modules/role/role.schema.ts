@@ -4,6 +4,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const role = sqliteTable("role", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull().unique(),
+  status: integer("status").notNull().default(1),
   description: text("description"),
   createdBy: integer("created_by"),
   createdAt: integer("created_at", { mode: "timestamp" })
