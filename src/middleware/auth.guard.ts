@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { roleService } from "modules/role/role.service";
-import { userService } from "modules/user/user.service";
 import { authService } from "../modules/auth/auth.service";
+import { roleService } from "../modules/role/role.service";
+import { userService } from "../modules/user/user.service";
 
 export async function authGuard(
   req: Request,
@@ -9,14 +9,26 @@ export async function authGuard(
   next: NextFunction
 ) {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.sendStatus(401);
+  if (!token) {
+    return res
+      .status(401)
+      .json({
+        message: "未登录，请先登录",
+        data: null
+      });
+  }
 
   try {
     const { uid } = authService.verify(token);
 
     const userData = await userService.getUserByUserId(uid);
     if (!userData) {
-      return res.status(401).json({ error: "User not found" });
+      return res
+        .status(401)
+        .json({
+          message: "用户不存在",
+          data: null
+        });
     }
 
     let actions: string[] = [];
@@ -38,6 +50,11 @@ export async function authGuard(
 
     next();
   } catch {
-    res.status(401).json({ error: "Invalid token" });
+    res
+      .status(401)
+      .json({
+        message: "无效的登录状态，请重新登录",
+        data: null
+      });
   }
 }

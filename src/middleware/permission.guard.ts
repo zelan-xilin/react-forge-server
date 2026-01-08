@@ -6,6 +6,11 @@ export function permissionGuard(moduleAction: string) {
       return next();
     }
 
-    return res.status(403).json({ error: "No permission" });
+    return res
+      .status(403)
+      .json({
+        message: "权限不足",
+        data: null
+      });
   };
 }

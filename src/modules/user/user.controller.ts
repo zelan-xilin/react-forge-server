@@ -28,31 +28,42 @@ export const userController = {
   async create(req: Request, res: Response) {
     const parsed = CreateUserDTO.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
-        errors: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
+      return res
+        .status(400)
+        .json({
+          message: "参数验证失败",
+          data: parsed.error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+          })),
+        });
     }
 
-    await userService.create({
+    const newUser = await userService.create({
       ...parsed.data,
       userId: req.user?.userId,
     });
 
-    res.json({ success: true });
+    res
+      .status(201)
+      .json({
+        message: "创建成功",
+        data: newUser
+      });
   },
 
   async update(req: Request, res: Response) {
     const parsed = UpdateUserDTO.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
-        errors: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
+      return res
+        .status(400)
+        .json({
+          message: "参数验证失败",
+          data: parsed.error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+          })),
+        });
     }
 
     await userService.update(Number(req.params.id), {
@@ -60,17 +71,29 @@ export const userController = {
       userId: req.user?.userId,
     });
 
-    res.json({ success: true });
+    res
+      .status(200)
+      .json({
+        message: "更新成功",
+        data: null
+      });
   },
 
   async delete(req: Request, res: Response) {
     await userService.delete(Number(req.params.id));
-    res.json({ success: true });
+    res
+      .status(204)
+      .send()
   },
 
   async list(req: Request, res: Response) {
     const data = await userService.list();
-    res.json(data);
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data
+      });
   },
 
   async page(req: Request, res: Response) {
@@ -83,20 +106,51 @@ export const userController = {
     };
 
     const data = await userService.page(query);
-    res.json(data);
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data
+      });
   },
 
   async validate(req: Request, res: Response) {
     const { username, password } = req.body;
     const user = await userService.validate(username, password);
-    res.json(user);
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({
+          message: "用户名或密码错误",
+          data: null
+        });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "验证成功",
+        data: user
+      });
   },
 
   async getUserByUserId(req: Request, res: Response) {
     const data = await userService.getUserByUserId(Number(req.params.id));
+
     if (!data) {
-      return res.status(404).json({ error: "User not found" });
+      return res
+        .status(404)
+        .json({
+          message: "用户不存在"
+        });
     }
-    res.json(data);
+
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data
+      });
   },
 };

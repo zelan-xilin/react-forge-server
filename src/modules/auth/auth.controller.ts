@@ -17,14 +17,31 @@ export const authController = {
         field: issue.path.join("."),
         message: issue.message,
       }));
-      return res.status(400).json({ errors });
+      return res
+        .status(400)
+        .json({
+          message: "参数验证失败",
+          data: errors
+        });
     }
 
     const { username, password } = parsed.data;
     const user = await userService.validate(username, password);
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) {
+      return res
+        .status(401)
+        .json({
+          message: "用户名或密码错误",
+          data: null
+        });
+    }
 
     const token = authService.sign(user.id);
-    res.json({ token });
+    res
+      .status(200)
+      .json({
+        message: "登录成功",
+        data: { token }
+      });
   },
 };
