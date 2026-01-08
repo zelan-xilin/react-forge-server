@@ -49,7 +49,7 @@ export const userController = {
         });
     }
 
-    const newUser = await userService.create({
+    await userService.create({
       ...parsed.data,
       userId: req.user?.userId,
     });
@@ -58,7 +58,7 @@ export const userController = {
       .status(201)
       .json({
         message: "创建成功",
-        data: newUser
+        data: null
       });
   },
 

@@ -41,7 +41,7 @@ export const roleController = {
         });
     }
 
-    const newRole = await roleService.create({
+    await roleService.create({
       ...parsed.data,
       userId: req.user?.userId,
     });
@@ -50,7 +50,7 @@ export const roleController = {
       .status(201)
       .json({
         message: "创建成功",
-        data: newRole
+        data: null
       });
   },
 
