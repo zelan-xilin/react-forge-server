@@ -6,15 +6,17 @@ import { userRoutes } from "./modules/user/user.routes";
 
 export const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-app.use("/auth", authRoutes);
-app.use("/role", roleRoutes);
-app.use("/user", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/users", userRoutes);
