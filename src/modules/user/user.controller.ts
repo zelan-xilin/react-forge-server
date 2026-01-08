@@ -24,7 +24,17 @@ const UpdateUserDTO = z.object({
   description: z.string().max(200).optional(),
 });
 
+const ValidateCredentialsDTO = z.object({
+  username: z
+    .string()
+    .min(3, "用户名至少3个字符"),
+  password: z
+    .string()
+    .min(6, "密码至少6个字符"),
+});
+
 export const userController = {
+  /** 新增用户 */
   async create(req: Request, res: Response) {
     const parsed = CreateUserDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -52,6 +62,7 @@ export const userController = {
       });
   },
 
+  /** 更新用户 */
   async update(req: Request, res: Response) {
     const parsed = UpdateUserDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -79,6 +90,7 @@ export const userController = {
       });
   },
 
+  /** 删除用户 */
   async delete(req: Request, res: Response) {
     await userService.delete(Number(req.params.id));
     res
@@ -86,16 +98,19 @@ export const userController = {
       .send()
   },
 
+  /** 用户列表 */
   async list(req: Request, res: Response) {
     const data = await userService.list();
+    const safeList = data.map(({ passwordHash, ...rest }) => rest);
     res
       .status(200)
       .json({
         message: "查询成功",
-        data
+        data: safeList
       });
   },
 
+  /** 用户分页 */
   async page(req: Request, res: Response) {
     const query = {
       username: req.query.username as string | undefined,
@@ -105,18 +120,45 @@ export const userController = {
       pageSize: req.query.pageSize ? Number(req.query.pageSize) : 10,
     };
 
-    const data = await userService.page(query);
+    const { list, total } = await userService.page(query);
+    const safeList = list.map(({ passwordHash, ...rest }) => rest);
     res
       .status(200)
       .json({
         message: "查询成功",
-        data
+        data: { list: safeList, total }
       });
   },
 
-  async validate(req: Request, res: Response) {
-    const { username, password } = req.body;
-    const user = await userService.validate(username, password);
+  /** 检查用户名是否存在 */
+  async isUsernameExists(req: Request, res: Response) {
+    const username = req.query.username as string;
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    const exists = await userService.isUsernameExists(username, userId);
+
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data: { exists }
+      });
+  },
+
+  /** 查看用户是否存在 */
+  async verifyUser(req: Request, res: Response) {
+    const parsed = ValidateCredentialsDTO.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "参数验证失败",
+        errors: parsed.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { username, password } = parsed.data;
+    const user = await userService.verifyUser(username, password);
 
     if (!user) {
       return res
@@ -127,14 +169,16 @@ export const userController = {
         });
     }
 
+    const { passwordHash, ...safeUser } = user;
     res
       .status(200)
       .json({
         message: "验证成功",
-        data: user
+        data: safeUser
       });
   },
 
+  /** 根据用户ID获取用户 */
   async getUserByUserId(req: Request, res: Response) {
     const data = await userService.getUserByUserId(Number(req.params.id));
 
@@ -146,11 +190,12 @@ export const userController = {
         });
     }
 
+    const { passwordHash, ...safeUser } = data;
     res
       .status(200)
       .json({
         message: "查询成功",
-        data
+        data: safeUser
       });
   },
 };

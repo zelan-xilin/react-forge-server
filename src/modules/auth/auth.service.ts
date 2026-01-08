@@ -1,12 +1,14 @@
 import jwt from "jsonwebtoken";
-
-const SECRET = "RBAC_SECRET";
+import { JWT_EXPIRES_IN, JWT_SECRET } from "../../config";
 
 export const authService = {
+  /** 生成 JWT */
   sign(uid: number) {
-    return jwt.sign({ uid }, SECRET, { expiresIn: "2h" });
+    return jwt.sign({ uid }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   },
+
+  /** 验证 JWT */
   verify(token: string) {
-    return jwt.verify(token, SECRET) as { uid: number };
+    return jwt.verify(token, JWT_SECRET) as { uid: number };
   },
 };

@@ -26,6 +26,7 @@ const SetActionPermissionsByRoleIdDTO = z.object({
 });
 
 export const roleController = {
+  /** 新增角色 */
   async create(req: Request, res: Response) {
     const parsed = CreateRoleDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -53,6 +54,7 @@ export const roleController = {
       });
   },
 
+  /** 更新角色 */
   async update(req: Request, res: Response) {
     const parsed = UpdateRoleDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -80,6 +82,7 @@ export const roleController = {
       });
   },
 
+  /** 删除角色 */
   async delete(req: Request, res: Response) {
     await roleService.delete(Number(req.params.id));
     res
@@ -87,6 +90,7 @@ export const roleController = {
       .send();
   },
 
+  /** 角色列表 */
   async list(req: Request, res: Response) {
     const data = await roleService.list();
     res
@@ -97,6 +101,7 @@ export const roleController = {
       });
   },
 
+  /** 角色分页 */
   async page(req: Request, res: Response) {
     const page = Number(req.query.page) || 1;
     const pageSize = Number(req.query.pageSize) || 10;
@@ -113,6 +118,22 @@ export const roleController = {
       });
   },
 
+  /** 验证角色名称是否存在 */
+  async isRoleNameExists(req: Request, res: Response) {
+    const name = String(req.query.name || "");
+    const roleId = req.query.roleId
+      ? Number(req.query.roleId)
+      : undefined;
+    const exists = await roleService.isRoleNameExists(name, roleId);
+    res
+      .status(200)
+      .json({
+        message: "查询成功",
+        data: { exists }
+      });
+  },
+
+  /** 设置角色路径权限 */
   async setPathPermissionsByRoleId(req: Request, res: Response) {
     const parsed = SetPathPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -139,6 +160,7 @@ export const roleController = {
       });
   },
 
+  /** 获取角色路径权限 */
   async getPathPermissionsByRoleId(req: Request, res: Response) {
     const data = await roleService.getPathPermissionsByRoleId(
       Number(req.params.id)
@@ -151,6 +173,7 @@ export const roleController = {
       });
   },
 
+  /** 设置角色操作权限 */
   async setActionPermissionsByRoleId(req: Request, res: Response) {
     const parsed = SetActionPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
@@ -177,6 +200,7 @@ export const roleController = {
       });
   },
 
+  /** 获取角色操作权限 */
   async getActionPermissionsByRoleId(req: Request, res: Response) {
     const data = await roleService.getActionPermissionsByRoleId(
       Number(req.params.id)

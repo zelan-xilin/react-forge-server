@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
+import { roleService } from '../role/role.service';
 import { userService } from "../user/user.service";
 import { authService } from "./auth.service";
 
@@ -9,6 +10,7 @@ const LoginDTO = z.object({
 });
 
 export const authController = {
+  /** 用户登录 */
   async login(req: Request, res: Response) {
     const parsed = LoginDTO.safeParse(req.body);
 
@@ -26,7 +28,7 @@ export const authController = {
     }
 
     const { username, password } = parsed.data;
-    const user = await userService.validate(username, password);
+    const user = await userService.verifyUser(username, password);
     if (!user) {
       return res
         .status(401)
@@ -36,12 +38,44 @@ export const authController = {
         });
     }
 
+    if (user.status !== 1) {
+      return res
+        .status(403)
+        .json({
+          message: "账号已被禁用",
+          data: null
+        });
+    }
+
+    let actions: { module: string; action: string; }[] = []
+    let paths: string[] = []
+    if (user.roleId && user.isAdmin !== 1) {
+      try {
+        [actions, paths] = await Promise.all([
+          roleService.getActionPermissionsByRoleId(user.roleId),
+          roleService.getPathPermissionsByRoleId(user.roleId),
+        ]);
+      } catch (error) {
+        console.error('查询权限失败:', error);
+      }
+    }
+
     const token = authService.sign(user.id);
+    const { passwordHash, ...safeUser } = user;
+    const data = {
+      token,
+      user: safeUser,
+      permissions: {
+        actions,
+        paths,
+      },
+    }
+
     res
       .status(200)
       .json({
         message: "登录成功",
-        data: { token }
+        data
       });
   },
 };
