@@ -17,6 +17,6 @@ app.use(
   })
 );
 
-app.use("/api/auth", authRoutes);
-app.use("/api/roles", roleRoutes);
-app.use("/api/users", userRoutes);
+app.use("/auth", authRoutes);
+app.use("/roles", roleRoutes);
+app.use("/users", userRoutes);
