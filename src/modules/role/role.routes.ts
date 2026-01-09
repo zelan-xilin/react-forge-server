@@ -8,53 +8,16 @@ export const roleRoutes = Router();
 roleRoutes.use(authGuard);
 
 /** 新增角色 */
-roleRoutes.post(
-  "/",
-  permissionGuard("role:create"),
-  roleController.create
-);
-
-/** 更新角色 */
-roleRoutes.put(
-  "/:id",
-  permissionGuard("role:update"),
-  roleController.update
-);
-
-/** 删除角色 */
-roleRoutes.delete(
-  "/:id",
-  permissionGuard("role:delete"),
-  roleController.delete
-);
+roleRoutes.post("/", permissionGuard("role:create"), roleController.create);
 
 /** 角色列表 */
-roleRoutes.get(
-  "/list",
-  permissionGuard("role:read"),
-  roleController.list
-);
+roleRoutes.get("/list", permissionGuard("role:read"), roleController.list);
 
 /** 角色分页 */
-roleRoutes.get(
-  "/page",
-  permissionGuard("role:read"),
-  roleController.page
-);
-
+roleRoutes.get("/page", permissionGuard("role:read"), roleController.page);
 
 /** 验证角色名称是否存在 */
-roleRoutes.get(
-  "/exists",
-  roleController.isRoleNameExists
-);
-
-/** 根据角色ID获取角色 */
-roleRoutes.get(
-  "/:id",
-  permissionGuard("role:read"),
-  roleController.getRoleByRoleId
-);
+roleRoutes.get("/exists", roleController.isRoleNameExists);
 
 /** 设置角色路径权限 */
 roleRoutes.put(
@@ -82,4 +45,28 @@ roleRoutes.get(
   "/:id/action",
   permissionGuard("role:read"),
   roleController.getActionPermissionsByRoleId
+);
+
+/** 统计角色总数，关联账号总数，已关联账号角色总数 */
+roleRoutes.get(
+  "/count",
+  permissionGuard("role:read"),
+  roleController.countRolesAndUsers
+);
+
+/** 更新角色 */
+roleRoutes.put("/:id", permissionGuard("role:update"), roleController.update);
+
+/** 删除角色 */
+roleRoutes.delete(
+  "/:id",
+  permissionGuard("role:delete"),
+  roleController.delete
+);
+
+/** 根据角色ID获取角色 */
+roleRoutes.get(
+  "/:id",
+  permissionGuard("role:read"),
+  roleController.getRoleByRoleId
 );
