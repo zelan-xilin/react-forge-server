@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { and, count, desc, eq, like, ne } from "drizzle-orm";
 import { db } from "../../db";
+import { IS_ADMIN, STATUS } from "../../types/base";
 import {
   CreateUserDTO,
   PageQueryDTO,
@@ -19,7 +20,8 @@ export const userService = {
       roleId: data.roleId,
       description: data.description,
       createdBy: data.userId,
-      status: data.status ?? 1,
+      status: data.status ?? STATUS.ENABLE,
+      isAdmin: data.isAdmin ?? IS_ADMIN.NO
     });
   },
 
@@ -44,6 +46,9 @@ export const userService = {
     }
     if (data.description !== undefined) {
       updateData.description = data.description;
+    }
+    if (data.isAdmin !== undefined) {
+      updateData.isAdmin = data.isAdmin;
     }
 
     return db.update(user).set(updateData).where(eq(user.id, id));

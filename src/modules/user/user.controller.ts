@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
+import { IS_ADMIN, STATUS } from "../../types/base";
 import { userService } from "./user.service";
 
 const CreateUserDTO = z.object({
@@ -14,6 +15,7 @@ const CreateUserDTO = z.object({
   roleId: z.number().int().positive("角色ID必须为正整数").optional(),
   description: z.string().max(200, "描述不能超过200个字符").optional(),
   status: z.number().int().min(0).max(1).optional(),
+  isAdmin: z.number().int().min(0).max(1).optional(),
 });
 
 const UpdateUserDTO = z.object({
@@ -22,6 +24,7 @@ const UpdateUserDTO = z.object({
   roleId: z.number().int().positive().optional(),
   status: z.number().int().min(0).max(1).optional(),
   description: z.string().max(200).optional(),
+  isAdmin: z.number().int().min(0).max(1).optional(),
 });
 
 const ValidateCredentialsDTO = z.object({
@@ -51,6 +54,8 @@ export const userController = {
 
     await userService.create({
       ...parsed.data,
+      status: parsed.data.status as STATUS | undefined,
+      isAdmin: parsed.data.isAdmin as IS_ADMIN | undefined,
       userId: req.user?.userId,
     });
 
@@ -79,6 +84,8 @@ export const userController = {
 
     await userService.update(Number(req.params.id), {
       ...parsed.data,
+      status: parsed.data.status as STATUS | undefined,
+      isAdmin: parsed.data.isAdmin as IS_ADMIN | undefined,
       userId: req.user?.userId,
     });
 
@@ -115,7 +122,7 @@ export const userController = {
     const query = {
       username: req.query.username as string | undefined,
       roleId: req.query.roleId ? Number(req.query.roleId) : undefined,
-      status: req.query.status ? Number(req.query.status) : undefined,
+      status: (req.query.status ? Number(req.query.status) : undefined) as STATUS | undefined,
       page: req.query.page ? Number(req.query.page) : 1,
       pageSize: req.query.pageSize ? Number(req.query.pageSize) : 10,
     };

@@ -10,7 +10,6 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS role (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
-      status INTEGER NOT NULL DEFAULT 1,
       description TEXT,
       created_by INTEGER,
       created_at INTEGER NOT NULL DEFAULT (unixepoch()),

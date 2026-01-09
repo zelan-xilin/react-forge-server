@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { authService } from "../modules/auth/auth.service";
 import { roleService } from "../modules/role/role.service";
 import { userService } from "../modules/user/user.service";
+import { IS_ADMIN } from "../types/base";
 
 export async function authGuard(
   req: Request,
@@ -32,7 +33,7 @@ export async function authGuard(
     }
 
     let actions: string[] = [];
-    if (userData.roleId && userData.isAdmin !== 1) {
+    if (userData.roleId && userData.isAdmin !== IS_ADMIN.YES) {
       const perms = await roleService.getActionPermissionsByRoleId(
         userData.roleId
       );
@@ -44,7 +45,7 @@ export async function authGuard(
       username: userData.username,
       roleId: userData.roleId,
       status: userData.status,
-      isAdmin: userData.isAdmin ?? 0,
+      isAdmin: userData.isAdmin ?? IS_ADMIN.NO,
       actions,
     };
 

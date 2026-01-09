@@ -15,7 +15,6 @@ export const roleService = {
       name: data.name,
       description: data.description,
       createdBy: data.userId,
-      status: data.status ?? 1,
     });
   },
 
@@ -28,9 +27,6 @@ export const roleService = {
 
     if (data.name !== undefined) {
       updateData.name = data.name;
-    }
-    if (data.status !== undefined) {
-      updateData.status = data.status;
     }
     if (data.description !== undefined) {
       updateData.description = data.description;
@@ -55,9 +51,6 @@ export const roleService = {
 
     if (data.name) {
       conditions.push(like(role.name, `%${data.name}%`));
-    }
-    if (data.status !== undefined) {
-      conditions.push(eq(role.status, data.status));
     }
 
     const whereClause = conditions.length ? and(...conditions) : undefined;

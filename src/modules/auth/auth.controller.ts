@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
+import { IS_ADMIN, STATUS } from "../../types/base";
 import { roleService } from '../role/role.service';
 import { userService } from "../user/user.service";
 import { authService } from "./auth.service";
@@ -38,7 +39,7 @@ export const authController = {
         });
     }
 
-    if (user.status !== 1) {
+    if (user.status !== STATUS.ENABLE) {
       return res
         .status(403)
         .json({
@@ -47,20 +48,14 @@ export const authController = {
         });
     }
 
-    let role: { status: number } | null = null
     let actions: { module: string; action: string; }[] = []
     let paths: string[] = []
-    if (user.roleId && user.isAdmin !== 1) {
+    if (user.roleId && user.isAdmin !== IS_ADMIN.YES) {
       try {
-        [role, actions, paths] = await Promise.all([
-          roleService.getRoleByRoleId(user.roleId),
+        [actions, paths] = await Promise.all([
           roleService.getActionPermissionsByRoleId(user.roleId),
           roleService.getPathPermissionsByRoleId(user.roleId),
         ]);
-        if (!role || role.status !== 1) {
-          actions = [];
-          paths = [];
-        }
       } catch (error) {
         console.error('查询权限失败:', error);
       }
