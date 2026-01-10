@@ -1,4 +1,5 @@
 import { and, count, desc, eq, like, ne, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../../db";
 import { user } from "../user/user.schema";
 import { role, roleActionPermission, rolePathPermission } from "./role.schema";
@@ -48,7 +49,14 @@ export const roleService = {
   },
 
   /** 删除角色 */
-  delete(id: number) {
+  async delete(id: number) {
+    await db
+      .delete(rolePathPermission)
+      .where(eq(rolePathPermission.roleId, id));
+    await db
+      .delete(roleActionPermission)
+      .where(eq(roleActionPermission.roleId, id));
+
     return db.delete(role).where(eq(role.id, id));
   },
 
@@ -72,9 +80,23 @@ export const roleService = {
       .from(role)
       .where(whereClause);
 
+    const creatorAlias = alias(user, "creator");
+    const updaterAlias = alias(user, "updater");
     const records = await db
-      .select()
+      .select({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+        createdBy: role.createdBy,
+        createdByName: creatorAlias.username,
+        createdAt: role.createdAt,
+        updatedBy: role.updatedBy,
+        updatedByName: updaterAlias.username,
+        updatedAt: role.updatedAt,
+      })
       .from(role)
+      .leftJoin(creatorAlias, eq(role.createdBy, creatorAlias.id))
+      .leftJoin(updaterAlias, eq(role.updatedBy, updaterAlias.id))
       .where(whereClause)
       .orderBy(desc(role.createdAt))
       .limit(data.pageSize)
