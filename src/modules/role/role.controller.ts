@@ -39,14 +39,14 @@ export const roleController = {
       });
     }
 
-    await roleService.create({
+    const data = await roleService.create({
       ...parsed.data,
       userId: req.user?.userId,
     });
 
     res.status(201).json({
       message: "创建成功",
-      data: null,
+      data,
     });
   },
 
@@ -63,14 +63,14 @@ export const roleController = {
       });
     }
 
-    await roleService.update(Number(req.params.id), {
+    const data = await roleService.update(Number(req.params.id), {
       ...parsed.data,
       userId: req.user?.userId,
     });
 
     res.status(200).json({
       message: "更新成功",
-      data: null,
+      data,
     });
   },
 

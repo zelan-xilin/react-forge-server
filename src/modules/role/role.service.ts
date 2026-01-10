@@ -11,16 +11,21 @@ import {
 
 export const roleService = {
   /** 新增角色 */
-  create(data: CreateRoleDTO) {
-    return db.insert(role).values({
-      name: data.name,
-      description: data.description,
-      createdBy: data.userId,
-    });
+  async create(data: CreateRoleDTO) {
+    const result = await db
+      .insert(role)
+      .values({
+        name: data.name,
+        description: data.description,
+        createdBy: data.userId,
+      })
+      .returning();
+
+    return result[0];
   },
 
   /** 更新角色 */
-  update(id: number, data: UpdateRoleDTO) {
+  async update(id: number, data: UpdateRoleDTO) {
     const updateData: UpdateRoleData = {
       updatedBy: data.userId,
       updatedAt: new Date(),
@@ -33,7 +38,13 @@ export const roleService = {
       updateData.description = data.description;
     }
 
-    return db.update(role).set(updateData).where(eq(role.id, id));
+    const result = await db
+      .update(role)
+      .set(updateData)
+      .where(eq(role.id, id))
+      .returning();
+
+    return result[0];
   },
 
   /** 删除角色 */

@@ -46,7 +46,7 @@ export const userController = {
       });
     }
 
-    await userService.create({
+    const data = await userService.create({
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       isAdmin: parsed.data.isAdmin as IS_ADMIN | undefined,
@@ -55,7 +55,7 @@ export const userController = {
 
     res.status(201).json({
       message: "创建成功",
-      data: null,
+      data,
     });
   },
 
@@ -72,7 +72,7 @@ export const userController = {
       });
     }
 
-    await userService.update(Number(req.params.id), {
+    const data = await userService.update(Number(req.params.id), {
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       isAdmin: parsed.data.isAdmin as IS_ADMIN | undefined,
@@ -81,7 +81,7 @@ export const userController = {
 
     res.status(200).json({
       message: "更新成功",
-      data: null,
+      data,
     });
   },
 

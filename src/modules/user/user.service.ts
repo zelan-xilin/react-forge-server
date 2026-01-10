@@ -14,15 +14,20 @@ export const userService = {
   /** 新增用户 */
   async create(data: CreateUserDTO) {
     const hash = await bcrypt.hash(data.password, 10);
-    return db.insert(user).values({
-      username: data.username,
-      passwordHash: hash,
-      roleId: data.roleId,
-      description: data.description,
-      createdBy: data.userId,
-      status: data.status ?? STATUS.ENABLE,
-      isAdmin: data.isAdmin ?? IS_ADMIN.NO,
-    });
+    const result = await db
+      .insert(user)
+      .values({
+        username: data.username,
+        passwordHash: hash,
+        roleId: data.roleId,
+        description: data.description,
+        createdBy: data.userId,
+        status: data.status ?? STATUS.ENABLE,
+        isAdmin: data.isAdmin ?? IS_ADMIN.NO,
+      })
+      .returning();
+
+    return result[0];
   },
 
   /** 更新用户 */
@@ -51,7 +56,13 @@ export const userService = {
       updateData.isAdmin = data.isAdmin;
     }
 
-    return db.update(user).set(updateData).where(eq(user.id, id));
+    const result = await db
+      .update(user)
+      .set(updateData)
+      .where(eq(user.id, id))
+      .returning();
+
+    return result[0];
   },
 
   /** 删除用户 */
