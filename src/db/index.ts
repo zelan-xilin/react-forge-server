@@ -35,6 +35,7 @@ export function initDb() {
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       role_id INTEGER,
+      phone TEXT,
       status INTEGER NOT NULL DEFAULT 1,
       description TEXT,
       created_by INTEGER,

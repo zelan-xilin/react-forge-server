@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
-import { and, count, desc, eq, like, ne } from "drizzle-orm";
+import { and, count, desc, eq, like, ne, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../../db";
 import { IS_ADMIN, STATUS } from "../../types/base";
+import { role } from "../role/role.schema";
 import {
   CreateUserDTO,
   PageQueryDTO,
@@ -20,6 +22,7 @@ export const userService = {
         username: data.username,
         passwordHash: hash,
         roleId: data.roleId,
+        phone: data.phone,
         description: data.description,
         createdBy: data.userId,
         status: data.status ?? STATUS.ENABLE,
@@ -54,6 +57,9 @@ export const userService = {
     }
     if (data.isAdmin !== undefined) {
       updateData.isAdmin = data.isAdmin;
+    }
+    if (data.phone !== undefined) {
+      updateData.phone = data.phone;
     }
 
     const result = await db
@@ -96,9 +102,30 @@ export const userService = {
       .from(user)
       .where(whereClause);
 
+    const creatorAlias = alias(user, "creator");
+    const updaterAlias = alias(user, "updater");
     const records = await db
-      .select()
+      .select({
+        id: user.id,
+        username: user.username,
+        passwordHash: user.passwordHash,
+        roleId: user.roleId,
+        roleName: role.name,
+        status: user.status,
+        description: user.description,
+        createdBy: user.createdBy,
+        createdByName: creatorAlias.username,
+        createdAt: user.createdAt,
+        updatedBy: user.updatedBy,
+        updatedByName: updaterAlias.username,
+        updatedAt: user.updatedAt,
+        isAdmin: user.isAdmin,
+        phone: user.phone,
+      })
       .from(user)
+      .leftJoin(role, eq(user.roleId, role.id))
+      .leftJoin(creatorAlias, eq(user.createdBy, creatorAlias.id))
+      .leftJoin(updaterAlias, eq(user.updatedBy, updaterAlias.id))
       .where(whereClause)
       .orderBy(desc(user.createdAt))
       .limit(data.pageSize)
@@ -135,5 +162,28 @@ export const userService = {
   async getUserByUserId(id: number) {
     const result = await db.select().from(user).where(eq(user.id, id)).limit(1);
     return result[0] || null;
+  },
+
+  /** 统计用户总数，活跃状态用户总数，已关联角色的用户总数 */
+  async countUsers() {
+    const [userCount, enableUserCount, associatedUserCount] = await Promise.all(
+      [
+        db.select({ userCount: count() }).from(user),
+        db
+          .select({ enableUserCount: count() })
+          .from(user)
+          .where(eq(user.status, STATUS.ENABLE)),
+        db
+          .select({ associatedUserCount: count() })
+          .from(user)
+          .where(sql`role_id IS NOT NULL`),
+      ]
+    );
+
+    return {
+      userCount: userCount[0]?.userCount ?? 0,
+      enableUserCount: enableUserCount[0]?.enableUserCount ?? 0,
+      associatedUserCount: associatedUserCount[0]?.associatedUserCount ?? 0,
+    };
   },
 };

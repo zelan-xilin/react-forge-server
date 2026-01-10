@@ -7,6 +7,7 @@ export const user = sqliteTable("user", {
   passwordHash: text("password_hash").notNull(),
   roleId: integer("role_id"),
   status: integer("status").notNull().default(1),
+  phone: text("phone"),
   description: text("description"),
   createdBy: integer("created_by"),
   createdAt: integer("created_at", { mode: "timestamp" })

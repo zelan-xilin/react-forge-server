@@ -193,7 +193,6 @@ export const roleController = {
 
   /** 统计角色总数，关联账号总数，已关联账号角色总数 */
   async countRolesAndUsers(req: Request, res: Response) {
-    console.log("countRolesAndUsers controller called");
     const data = await roleService.countRolesAndUsers();
     res.status(200).json({
       message: "查询成功",

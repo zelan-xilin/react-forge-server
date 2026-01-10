@@ -7,7 +7,8 @@ export interface CreateUserDTO {
   description?: string;
   status?: STATUS;
   userId?: number;
-  isAdmin?: IS_ADMIN
+  isAdmin?: IS_ADMIN;
+  phone?: string;
 }
 
 export interface UpdateUserDTO {
@@ -17,7 +18,8 @@ export interface UpdateUserDTO {
   status?: STATUS;
   description?: string;
   userId?: number;
-  isAdmin?: IS_ADMIN
+  isAdmin?: IS_ADMIN;
+  phone?: string;
 }
 
 export interface PageQueryDTO {
@@ -33,8 +35,9 @@ export interface UpdateUserData {
   passwordHash?: string;
   roleId?: number;
   status?: STATUS;
+  phone?: string;
   description?: string;
   updatedBy?: number;
   updatedAt: Date;
-  isAdmin?: IS_ADMIN
+  isAdmin?: IS_ADMIN;
 }

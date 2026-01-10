@@ -8,48 +8,25 @@ export const userRoutes = Router();
 userRoutes.use(authGuard);
 
 /** 新增用户 */
-userRoutes.post(
-  "/",
-  permissionGuard("user:create"),
-  userController.create
-);
-
-/** 更新用户 */
-userRoutes.put(
-  "/:id",
-  permissionGuard("user:update"),
-  userController.update
-);
-
-/** 删除用户 */
-userRoutes.delete(
-  "/:id",
-  permissionGuard("user:delete"),
-  userController.delete
-);
+userRoutes.post("/", permissionGuard("user:create"), userController.create);
 
 /** 用户列表 */
-userRoutes.get(
-  "/list",
-  permissionGuard("user:read"),
-  userController.list);
+userRoutes.get("/list", permissionGuard("user:read"), userController.list);
 
 /** 用户分页 */
-userRoutes.get(
-  "/page",
-  permissionGuard("user:read"),
-  userController.page);
+userRoutes.get("/page", permissionGuard("user:read"), userController.page);
 
 /** 检查用户名是否存在 */
-userRoutes.get(
-  "/exists",
-  userController.isUsernameExists
-);
+userRoutes.get("/exists", userController.isUsernameExists);
 
 /** 查看用户是否存在 */
+userRoutes.get("/verify", userController.verifyUser);
+
+/** 统计用户总数，活跃状态用户总数，已关联角色的用户总数 */
 userRoutes.get(
-  "/verify",
-  userController.verifyUser
+  "/count",
+  permissionGuard("user:read"),
+  userController.countUsers
 );
 
 /** 根据用户ID获取用户 */
@@ -57,4 +34,14 @@ userRoutes.get(
   "/:id",
   permissionGuard("user:read"),
   userController.getUserByUserId
+);
+
+/** 更新用户 */
+userRoutes.put("/:id", permissionGuard("user:update"), userController.update);
+
+/** 删除用户 */
+userRoutes.delete(
+  "/:id",
+  permissionGuard("user:delete"),
+  userController.delete
 );
