@@ -61,7 +61,7 @@ export const roleService = {
       .from(role)
       .where(whereClause);
 
-    const list = await db
+    const records = await db
       .select()
       .from(role)
       .where(whereClause)
@@ -69,7 +69,7 @@ export const roleService = {
       .limit(data.pageSize)
       .offset((data.page - 1) * data.pageSize);
 
-    return { list, total };
+    return { records, total };
   },
 
   /** 验证角色名称是否存在 */
@@ -106,11 +106,11 @@ export const roleService = {
 
   /** 获取角色路径权限 */
   async getPathPermissionsByRoleId(roleId: number) {
-    const list = await db
+    const records = await db
       .select()
       .from(rolePathPermission)
       .where(eq(rolePathPermission.roleId, roleId));
-    return list.map((i) => i.path);
+    return records.map((i) => i.path);
   },
 
   /** 设置角色操作权限 */
@@ -135,11 +135,11 @@ export const roleService = {
 
   /** 获取角色操作权限 */
   async getActionPermissionsByRoleId(roleId: number) {
-    const list = await db
+    const records = await db
       .select()
       .from(roleActionPermission)
       .where(eq(roleActionPermission.roleId, roleId));
-    return list.map((i) => ({ module: i.module, action: i.action }));
+    return records.map((i) => ({ module: i.module, action: i.action }));
   },
 
   /** 统计角色总数，关联账号总数，已关联账号角色总数 */

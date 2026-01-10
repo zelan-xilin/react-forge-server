@@ -21,7 +21,7 @@ export const userService = {
       description: data.description,
       createdBy: data.userId,
       status: data.status ?? STATUS.ENABLE,
-      isAdmin: data.isAdmin ?? IS_ADMIN.NO
+      isAdmin: data.isAdmin ?? IS_ADMIN.NO,
     });
   },
 
@@ -78,7 +78,6 @@ export const userService = {
       conditions.push(eq(user.status, data.status));
     }
 
-
     const whereClause = conditions.length ? and(...conditions) : undefined;
 
     const [{ total }] = await db
@@ -86,7 +85,7 @@ export const userService = {
       .from(user)
       .where(whereClause);
 
-    const list = await db
+    const records = await db
       .select()
       .from(user)
       .where(whereClause)
@@ -94,7 +93,7 @@ export const userService = {
       .limit(data.pageSize)
       .offset((data.page - 1) * data.pageSize);
 
-    return { list, total };
+    return { records, total };
   },
 
   /** 检查用户名是否存在 */
