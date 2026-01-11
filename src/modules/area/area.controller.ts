@@ -7,7 +7,7 @@ const CreateAreaPricingRuleDTO = z.object({
   roomSize: z.string().optional(),
   timeType: z.string().min(1, "应用时间不能为空"),
   startTimeFrom: z.string().min(1, "应用时间起始不能为空"),
-  baseDurationMinutes: z.number().min(1, "基础时长必须大于0"),
+  baseDurationMinutes: z.number().min(1, "使用时长必须大于0"),
   basePrice: z.number().min(0, "起步价格不能为负数"),
   overtimePricePerHour: z.number().min(0, "超时每小时价格不能为负数"),
   overtimeRounding: z.string().min(1, "超时取整方式不能为空"),
