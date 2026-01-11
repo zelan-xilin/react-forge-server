@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import { areaRoutes } from "./modules/area/area.routes";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { roleRoutes } from "./modules/role/role.routes";
 import { userRoutes } from "./modules/user/user.routes";
@@ -20,3 +21,4 @@ app.use(
 app.use("/auth", authRoutes);
 app.use("/roles", roleRoutes);
 app.use("/users", userRoutes);
+app.use("/areas", areaRoutes);

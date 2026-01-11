@@ -44,6 +44,41 @@ export function initDb() {
       updated_at INTEGER,
       is_admin INTEGER DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS area_pricing_rule (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      area_type TEXT NOT NULL,
+      room_size TEXT,
+      time_type TEXT NOT NULL,
+      start_time_from TEXT NOT NULL,
+      base_duration_minutes INTEGER NOT NULL,
+      base_price REAL NOT NULL,
+      overtime_price_per_hour REAL NOT NULL,
+      overtime_rounding TEXT NOT NULL,
+      overtime_grace_minutes INTEGER DEFAULT 0,
+      gift_tea_amount REAL DEFAULT 0,
+      status INTEGER DEFAULT 1,
+      description TEXT,
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS area_resource (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      area_type TEXT NOT NULL,
+      room_size TEXT,
+      capacity INTEGER,
+      status INTEGER DEFAULT 1,
+      description TEXT,
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
   `);
 
   console.log("Database initialized successfully");
