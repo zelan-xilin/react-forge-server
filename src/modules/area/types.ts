@@ -1,5 +1,4 @@
 export interface CreateAreaPricingRuleDTO {
-  name: string;
   areaType: string;
   roomSize?: string;
   timeType: string;
@@ -16,7 +15,6 @@ export interface CreateAreaPricingRuleDTO {
 }
 
 export interface UpdateAreaPricingRuleDTO {
-  name?: string;
   areaType?: string;
   roomSize?: string;
   timeType?: string;
@@ -33,7 +31,6 @@ export interface UpdateAreaPricingRuleDTO {
 }
 
 export interface UpdateAreaPricingRuleData {
-  name?: string;
   areaType?: string;
   roomSize?: string;
   timeType?: string;

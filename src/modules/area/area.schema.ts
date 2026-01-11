@@ -3,7 +3,6 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const areaPricingRule = sqliteTable("area_pricing_rule", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull().unique(),
   areaType: text("area_type").notNull(), // 'private_room' | 'hall_seat' | 'balcony'
   roomSize: text("room_size"), // 'large' | 'medium' | 'small' | null
   timeType: text("time_type").notNull(), // 'day' | 'night'

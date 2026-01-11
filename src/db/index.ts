@@ -47,7 +47,6 @@ export function initDb() {
 
     CREATE TABLE IF NOT EXISTS area_pricing_rule (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
       area_type TEXT NOT NULL,
       room_size TEXT,
       time_type TEXT NOT NULL,

@@ -18,7 +18,6 @@ export const areaService = {
     const result = await db
       .insert(areaPricingRule)
       .values({
-        name: data.name,
         areaType: data.areaType,
         roomSize: data.roomSize,
         timeType: data.timeType,
@@ -45,9 +44,6 @@ export const areaService = {
       updatedAt: new Date(),
     };
 
-    if (data.name !== undefined) {
-      updateData.name = data.name;
-    }
     if (data.areaType !== undefined) {
       updateData.areaType = data.areaType;
     }
@@ -104,24 +100,31 @@ export const areaService = {
     const creatorAlias = alias(user, "creator");
     const updaterAlias = alias(user, "updater");
     return db
-      .select()
+      .select({
+        id: areaPricingRule.id,
+        areaType: areaPricingRule.areaType,
+        roomSize: areaPricingRule.roomSize,
+        timeType: areaPricingRule.timeType,
+        startTimeFrom: areaPricingRule.startTimeFrom,
+        baseDurationMinutes: areaPricingRule.baseDurationMinutes,
+        basePrice: areaPricingRule.basePrice,
+        overtimePricePerHour: areaPricingRule.overtimePricePerHour,
+        overtimeRounding: areaPricingRule.overtimeRounding,
+        overtimeGraceMinutes: areaPricingRule.overtimeGraceMinutes,
+        giftTeaAmount: areaPricingRule.giftTeaAmount,
+        status: areaPricingRule.status,
+        description: areaPricingRule.description,
+        createdBy: areaPricingRule.createdBy,
+        createdAt: areaPricingRule.createdAt,
+        updatedBy: areaPricingRule.updatedBy,
+        updatedAt: areaPricingRule.updatedAt,
+        creatorName: creatorAlias.username,
+        updaterName: updaterAlias.username,
+      })
       .from(areaPricingRule)
       .leftJoin(creatorAlias, eq(areaPricingRule.createdBy, creatorAlias.id))
       .leftJoin(updaterAlias, eq(areaPricingRule.updatedBy, updaterAlias.id))
       .orderBy(desc(areaPricingRule.createdAt));
-  },
-
-  /** 验证区域收费规则名称是否存在 */
-  async isAreaPricingRuleNameExists(name: string, areaPricingRuleId?: number) {
-    const conditions = [eq(areaPricingRule.name, name)];
-    if (areaPricingRuleId !== undefined) {
-      conditions.push(ne(areaPricingRule.id, areaPricingRuleId));
-    }
-    const countResult = await db
-      .select({ count: count() })
-      .from(areaPricingRule)
-      .where(and(...conditions));
-    return countResult[0].count > 0;
   },
 
   /** 新增区域资源 */
@@ -187,7 +190,21 @@ export const areaService = {
     const creatorAlias = alias(user, "creator");
     const updaterAlias = alias(user, "updater");
     return db
-      .select()
+      .select({
+        id: areaResource.id,
+        name: areaResource.name,
+        areaType: areaResource.areaType,
+        roomSize: areaResource.roomSize,
+        capacity: areaResource.capacity,
+        status: areaResource.status,
+        description: areaResource.description,
+        createdBy: areaResource.createdBy,
+        createdAt: areaResource.createdAt,
+        updatedBy: areaResource.updatedBy,
+        updatedAt: areaResource.updatedAt,
+        creatorName: creatorAlias.username,
+        updaterName: updaterAlias.username,
+      })
       .from(areaResource)
       .leftJoin(creatorAlias, eq(areaResource.createdBy, creatorAlias.id))
       .leftJoin(updaterAlias, eq(areaResource.updatedBy, updaterAlias.id))

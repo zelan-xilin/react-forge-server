@@ -35,13 +35,6 @@ areaRoutes.get(
   areaController.listAreaPricingRules
 );
 
-/** 验证区域收费规则名称是否存在 */
-areaRoutes.get(
-  "/rule/exists",
-  permissionGuard("area-pricing-rule:read"),
-  areaController.isAreaPricingRuleNameExists
-);
-
 /** 新增区域资源 */
 areaRoutes.post(
   "/resource",

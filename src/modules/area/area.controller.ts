@@ -3,13 +3,12 @@ import { z } from "zod";
 import { areaService } from "./area.service";
 
 const CreateAreaPricingRuleDTO = z.object({
-  name: z.string().min(1, "角色名不能为空").max(50, "角色名不能超过50个字符"),
   areaType: z.string().min(1, "区域类型不能为空"),
-  roomSize: z.string().max(20, "包间大小不能超过20个字符").optional(),
-  timeType: z.string().min(1, "时间类型不能为空"),
-  startTimeFrom: z.string().min(1, "开始计费时间不能为空"),
+  roomSize: z.string().optional(),
+  timeType: z.string().min(1, "应用时间不能为空"),
+  startTimeFrom: z.string().min(1, "应用时间起始不能为空"),
   baseDurationMinutes: z.number().min(1, "基础时长必须大于0"),
-  basePrice: z.number().min(0, "基础价格不能为负数"),
+  basePrice: z.number().min(0, "起步价格不能为负数"),
   overtimePricePerHour: z.number().min(0, "超时每小时价格不能为负数"),
   overtimeRounding: z.string().min(1, "超时取整方式不能为空"),
   overtimeGraceMinutes: z.number().min(0, "超时宽限分钟不能为负数").optional(),
@@ -19,24 +18,19 @@ const CreateAreaPricingRuleDTO = z.object({
 });
 
 const UpdateAreaPricingRuleDTO = z.object({
-  name: z
-    .string()
-    .min(1, "角色名不能为空")
-    .max(50, "角色名不能超过50个字符")
-    .optional(),
-  areaType: z.string().min(1, "区域类型不能为空").optional(),
-  roomSize: z.string().max(20, "包间大小不能超过20个字符").optional(),
-  timeType: z.string().min(1, "时间类型不能为空").optional(),
-  startTimeFrom: z.string().min(1, "开始计费时间不能为空").optional(),
-  baseDurationMinutes: z.number().min(1, "基础时长必须大于0").optional(),
-  basePrice: z.number().min(0, "基础价格不能为负数").optional(),
+  areaType: z.string().optional(),
+  roomSize: z.string().optional(),
+  timeType: z.string().optional(),
+  startTimeFrom: z.string().optional(),
+  baseDurationMinutes: z.number().optional(),
+  basePrice: z.number().min(0, "起步价格不能为负数").optional(),
   overtimePricePerHour: z
     .number()
     .min(0, "超时每小时价格不能为负数")
     .optional(),
-  overtimeRounding: z.string().min(1, "超时取整方式不能为空").optional(),
-  overtimeGraceMinutes: z.number().min(0, "超时宽限分钟不能为负数").optional(),
-  giftTeaAmount: z.number().min(0, "赠送茶水金额不能为负数").optional(),
+  overtimeRounding: z.string().optional(),
+  overtimeGraceMinutes: z.number().optional(),
+  giftTeaAmount: z.number().optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200, "描述不能超过200个字符").optional(),
 });
@@ -47,7 +41,7 @@ const CerateAreaResourceDTO = z.object({
     .min(1, "资源名称不能为空")
     .max(50, "资源名称不能超过50个字符"),
   areaType: z.string().min(1, "区域类型不能为空"),
-  roomSize: z.string().max(20, "包间大小不能超过20个字符").optional(),
+  roomSize: z.string().optional(),
   capacity: z.number().min(0, "容量不能为负数").optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200, "描述不能超过200个字符").optional(),
@@ -59,9 +53,9 @@ const UpdateAreaResourceDTO = z.object({
     .min(1, "资源名称不能为空")
     .max(50, "资源名称不能超过50个字符")
     .optional(),
-  areaType: z.string().min(1, "区域类型不能为空").optional(),
-  roomSize: z.string().max(20, "包间大小不能超过20个字符").optional(),
-  capacity: z.number().min(0, "容量不能为负数").optional(),
+  areaType: z.string().optional(),
+  roomSize: z.string().optional(),
+  capacity: z.number().optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200, "描述不能超过200个字符").optional(),
 });
@@ -130,22 +124,6 @@ export const areaController = {
     res.status(200).json({
       message: "查询成功",
       data,
-    });
-  },
-
-  /** 验证区域收费规则名称是否存在 */
-  async isAreaPricingRuleNameExists(req: Request, res: Response) {
-    const name = String(req.query.name || "");
-    const areaPricingRuleId = req.query.areaPricingRuleId
-      ? Number(req.query.areaPricingRuleId)
-      : undefined;
-    const exists = await areaService.isAreaPricingRuleNameExists(
-      name,
-      areaPricingRuleId
-    );
-    res.status(200).json({
-      message: "查询成功",
-      data: { exists },
     });
   },
 
