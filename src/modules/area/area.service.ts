@@ -1,5 +1,7 @@
 import { and, count, desc, eq, ne } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../../db";
+import { user } from "../user/user.schema";
 import { areaPricingRule, areaResource } from "./area.schema";
 import {
   CreateAreaPricingRuleDTO,
@@ -99,9 +101,13 @@ export const areaService = {
 
   /** 区域收费规则列表 */
   listAreaPricingRules() {
+    const creatorAlias = alias(user, "creator");
+    const updaterAlias = alias(user, "updater");
     return db
       .select()
       .from(areaPricingRule)
+      .leftJoin(creatorAlias, eq(areaPricingRule.createdBy, creatorAlias.id))
+      .leftJoin(updaterAlias, eq(areaPricingRule.updatedBy, updaterAlias.id))
       .orderBy(desc(areaPricingRule.createdAt));
   },
 
@@ -178,7 +184,14 @@ export const areaService = {
 
   /** 区域资源列表 */
   listAreaResources() {
-    return db.select().from(areaResource).orderBy(desc(areaResource.createdAt));
+    const creatorAlias = alias(user, "creator");
+    const updaterAlias = alias(user, "updater");
+    return db
+      .select()
+      .from(areaResource)
+      .leftJoin(creatorAlias, eq(areaResource.createdBy, creatorAlias.id))
+      .leftJoin(updaterAlias, eq(areaResource.updatedBy, updaterAlias.id))
+      .orderBy(desc(areaResource.createdAt));
   },
 
   /** 验证区域资源名称是否存在 */
