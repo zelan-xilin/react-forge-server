@@ -16,6 +16,10 @@ const CreateUserDTO = z.object({
   description: z.string().max(200, "描述不能超过200个字符").optional(),
   status: z.number().int().min(0).max(1).optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
+  phone: z
+    .string()
+    .regex(/^1[3-9]\d{9}$/, "手机号格式不正确")
+    .optional(),
 });
 
 const UpdateUserDTO = z.object({
@@ -25,6 +29,10 @@ const UpdateUserDTO = z.object({
   status: z.number().int().min(0).max(1).optional(),
   description: z.string().max(200).optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
+  phone: z
+    .string()
+    .regex(/^1[3-9]\d{9}$/, "手机号格式不正确")
+    .optional(),
 });
 
 const ValidateCredentialsDTO = z.object({
