@@ -56,6 +56,7 @@ export const roleService = {
     await db
       .delete(roleActionPermission)
       .where(eq(roleActionPermission.roleId, id));
+    await db.update(user).set({ roleId: null }).where(eq(user.roleId, id));
 
     return db.delete(role).where(eq(role.id, id));
   },
