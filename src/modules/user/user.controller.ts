@@ -188,13 +188,4 @@ export const userController = {
       data: safeUser,
     });
   },
-
-  /** 统计用户总数，活跃状态用户总数，已关联角色的用户总数 */
-  async countUsers(req: Request, res: Response) {
-    const data = await userService.countUsers();
-    res.status(200).json({
-      message: "查询成功",
-      data,
-    });
-  },
 };

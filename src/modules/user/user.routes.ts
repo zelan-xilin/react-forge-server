@@ -22,13 +22,6 @@ userRoutes.get("/exists", userController.isUsernameExists);
 /** 查看用户是否存在 */
 userRoutes.get("/verify", userController.verifyUser);
 
-/** 统计用户总数，活跃状态用户总数，已关联角色的用户总数 */
-userRoutes.get(
-  "/count",
-  permissionGuard("user:read"),
-  userController.countUsers
-);
-
 /** 根据用户ID获取用户 */
 userRoutes.get(
   "/:id",

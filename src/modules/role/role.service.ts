@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, like, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../../db";
 import { user } from "../user/user.schema";
@@ -174,32 +174,5 @@ export const roleService = {
       .from(roleActionPermission)
       .where(eq(roleActionPermission.roleId, roleId));
     return records.map((i) => ({ module: i.module, action: i.action }));
-  },
-
-  /** 统计角色总数，关联账号总数，已关联账号角色总数 */
-  async countRolesAndUsers() {
-    const [
-      roleCountResult,
-      associatedUserCountResult,
-      associatedRoleCountResult,
-    ] = await Promise.all([
-      db.select({ roleCount: count() }).from(role),
-      db
-        .select({ associatedUserCount: count() })
-        .from(user)
-        .where(sql`role_id IS NOT NULL`),
-      db
-        .select({ associatedRoleCount: sql`COUNT(DISTINCT role_id)` })
-        .from(user)
-        .where(sql`role_id IS NOT NULL`),
-    ]);
-
-    return {
-      roleCount: roleCountResult[0]?.roleCount ?? 0,
-      associatedUserCount:
-        associatedUserCountResult[0]?.associatedUserCount ?? 0,
-      associatedRoleCount:
-        associatedRoleCountResult[0]?.associatedRoleCount ?? 0,
-    };
   },
 };

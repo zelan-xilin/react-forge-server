@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { and, count, desc, eq, like, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, like, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../../db";
 import { IS_ADMIN, STATUS } from "../../types/base";
@@ -162,28 +162,5 @@ export const userService = {
   async getUserByUserId(id: number) {
     const result = await db.select().from(user).where(eq(user.id, id)).limit(1);
     return result[0] || null;
-  },
-
-  /** 统计用户总数，活跃状态用户总数，已关联角色的用户总数 */
-  async countUsers() {
-    const [userCount, enableUserCount, associatedUserCount] = await Promise.all(
-      [
-        db.select({ userCount: count() }).from(user),
-        db
-          .select({ enableUserCount: count() })
-          .from(user)
-          .where(eq(user.status, STATUS.ENABLE)),
-        db
-          .select({ associatedUserCount: count() })
-          .from(user)
-          .where(sql`role_id IS NOT NULL`),
-      ]
-    );
-
-    return {
-      userCount: userCount[0]?.userCount ?? 0,
-      enableUserCount: enableUserCount[0]?.enableUserCount ?? 0,
-      associatedUserCount: associatedUserCount[0]?.associatedUserCount ?? 0,
-    };
   },
 };

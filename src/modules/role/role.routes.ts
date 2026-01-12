@@ -47,13 +47,6 @@ roleRoutes.get(
   roleController.getActionPermissionsByRoleId
 );
 
-/** 统计角色总数，关联账号总数，已关联账号角色总数 */
-roleRoutes.get(
-  "/count",
-  permissionGuard("role:read"),
-  roleController.countRolesAndUsers
-);
-
 /** 更新角色 */
 roleRoutes.put("/:id", permissionGuard("role:update"), roleController.update);
 
