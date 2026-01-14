@@ -9,7 +9,7 @@ const CreateRoleDTO = z.object({
 
 const UpdateRoleDTO = z.object({
   name: z.string().min(1).max(50).optional(),
-  description: z.string().max(200).optional(),
+  description: z.string().max(200).nullable().optional(),
 });
 
 const SetPathPermissionsByRoleIdDTO = z.object({

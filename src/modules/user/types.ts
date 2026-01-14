@@ -14,12 +14,12 @@ export interface CreateUserDTO {
 export interface UpdateUserDTO {
   username?: string;
   password?: string;
-  roleId?: number;
+  roleId?: number | null;
   status?: STATUS;
-  description?: string;
+  description?: string | null;
   userId?: number;
   isAdmin?: IS_ADMIN;
-  phone?: string;
+  phone?: string | null;
 }
 
 export interface PageQueryDTO {
@@ -33,10 +33,10 @@ export interface PageQueryDTO {
 export interface UpdateUserData {
   username?: string;
   passwordHash?: string;
-  roleId?: number;
+  roleId?: number | null;
   status?: STATUS;
-  phone?: string;
-  description?: string;
+  phone?: string | null;
+  description?: string | null;
   updatedBy?: number;
   updatedAt: Date;
   isAdmin?: IS_ADMIN;

@@ -25,13 +25,14 @@ const CreateUserDTO = z.object({
 const UpdateUserDTO = z.object({
   username: z.string().min(3).max(50).optional(),
   password: z.string().min(6).max(100).optional(),
-  roleId: z.number().int().positive().optional(),
+  roleId: z.number().int().positive().nullable().optional(),
   status: z.number().int().min(0).max(1).optional(),
-  description: z.string().max(200).optional(),
+  description: z.string().max(200).nullable().optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
   phone: z
     .string()
     .regex(/^1[3-9]\d{9}$/, "手机号格式不正确")
+    .nullable()
     .optional(),
 });
 

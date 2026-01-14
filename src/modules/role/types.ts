@@ -6,7 +6,7 @@ export interface CreateRoleDTO {
 
 export interface UpdateRoleDTO {
   name?: string;
-  description?: string;
+  description?: string | null;
   userId?: number;
 }
 
@@ -18,7 +18,7 @@ export interface PageQueryDTO {
 
 export interface UpdateRoleData {
   name?: string;
-  description?: string;
+  description?: string | null;
   updatedBy?: number;
   updatedAt: Date;
 }
