@@ -120,7 +120,34 @@ export const dictService = {
 
   /** 删除字典 */
   async delete(id: number) {
-    return db.delete(dict).where(eq(dict.id, id));
+    return db.transaction(async (tx) => {
+      const dictToDelete = await tx
+        .select({ id: dict.id, parentId: dict.parentId })
+        .from(dict)
+        .where(eq(dict.id, id))
+        .limit(1);
+
+      if (!dictToDelete.length) {
+        return 0;
+      }
+
+      const item = dictToDelete[0];
+
+      if (item.parentId === null) {
+        await tx.delete(dict).where(
+          inArray(dict.id, [
+            id,
+            ...(await tx
+              .select({ id: dict.id })
+              .from(dict)
+              .where(eq(dict.parentId, id))
+              .then((res) => res.map((r) => r.id))),
+          ])
+        );
+      } else {
+        await tx.delete(dict).where(eq(dict.id, id));
+      }
+    });
   },
 
   /** 字典列表 */
