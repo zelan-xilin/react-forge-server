@@ -45,6 +45,20 @@ export function initDb() {
       is_admin INTEGER DEFAULT 0
     );
 
+    CREATE TABLE IF NOT EXISTS dict (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      label TEXT NOT NULL,
+      value TEXT NOT NULL,
+      parent_id INTEGER,
+      sort INTEGER DEFAULT 99,
+      status INTEGER NOT NULL DEFAULT 1,
+      description TEXT,
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
+
     CREATE TABLE IF NOT EXISTS area_pricing_rule (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       area_type TEXT NOT NULL,
