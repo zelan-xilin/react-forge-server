@@ -13,64 +13,109 @@ import { db } from "../../db";
 import { STATUS } from "../../types/base";
 import { dict } from "../dict/dict.schema";
 import {
-  CreateDictDTO,
+  CreateDictWithChildrenDTO,
   PageQueryDTO,
-  UpdateDictData,
-  UpdateDictDTO,
+  UpdateDictWithChildrenDTO,
 } from "./types";
 
 export const dictService = {
   /** 新增字典 */
-  async create(data: CreateDictDTO) {
-    const result = await db
-      .insert(dict)
-      .values({
-        label: data.label,
-        value: data.value,
-        parentId: data.parentId,
-        sort: data.sort,
-        description: data.description,
-        status: data.status ?? STATUS.ENABLE,
-        createdBy: data.userId,
-      })
-      .returning();
+  async createWithChildren(data: CreateDictWithChildrenDTO) {
+    return db.transaction(async (tx) => {
+      const [parent] = await tx
+        .insert(dict)
+        .values({
+          label: data.label,
+          value: data.value,
+          parentId: null,
+          sort: data.sort,
+          status: data.status ?? STATUS.ENABLE,
+          description: data.description,
+          createdBy: data.userId,
+        })
+        .returning();
 
-    return result[0];
+      if (data.children?.length) {
+        await tx.insert(dict).values(
+          data.children.map((item) => ({
+            label: item.label,
+            value: item.value,
+            parentId: parent.id,
+            sort: item.sort,
+            status: item.status ?? STATUS.ENABLE,
+            description: item.description,
+            createdBy: data.userId,
+          }))
+        );
+      }
+
+      return parent;
+    });
   },
 
   /** 更新字典 */
-  async update(id: number, data: UpdateDictDTO) {
-    const updateData: UpdateDictData = {
-      updatedBy: data.userId,
-      updatedAt: new Date(),
-    };
+  async updateWithChildren(id: number, data: UpdateDictWithChildrenDTO) {
+    return db.transaction(async (tx) => {
+      await tx
+        .update(dict)
+        .set({
+          label: data.label,
+          value: data.value,
+          sort: data.sort,
+          status: data.status,
+          description: data.description,
+          updatedBy: data.userId,
+          updatedAt: new Date(),
+        })
+        .where(eq(dict.id, id));
 
-    if (data.label !== undefined) {
-      updateData.label = data.label;
-    }
-    if (data.value !== undefined) {
-      updateData.value = data.value;
-    }
-    if (data.parentId !== undefined) {
-      updateData.parentId = data.parentId;
-    }
-    if (data.sort !== undefined) {
-      updateData.sort = data.sort;
-    }
-    if (data.status !== undefined) {
-      updateData.status = data.status;
-    }
-    if (data.description !== undefined) {
-      updateData.description = data.description;
-    }
+      if (!data.children) {
+        return;
+      }
 
-    const result = await db
-      .update(dict)
-      .set(updateData)
-      .where(eq(dict.id, id))
-      .returning();
+      const existing = await tx
+        .select()
+        .from(dict)
+        .where(eq(dict.parentId, id));
 
-    return result[0];
+      const incomingIds = new Set<number>();
+
+      for (const item of data.children) {
+        if (item.id) {
+          incomingIds.add(item.id);
+          await tx
+            .update(dict)
+            .set({
+              label: item.label,
+              value: item.value,
+              sort: item.sort,
+              status: item.status,
+              description: item.description,
+              updatedBy: data.userId,
+              updatedAt: new Date(),
+            })
+            .where(eq(dict.id, item.id));
+        } else {
+          await tx.insert(dict).values({
+            label: item.label,
+            value: item.value,
+            parentId: id,
+            sort: item.sort,
+            status: item.status ?? STATUS.ENABLE,
+            description: item.description,
+            createdBy: data.userId,
+          });
+        }
+      }
+
+      const toDelete = existing
+        .filter((i) => !incomingIds.has(i.id))
+        .map((i) => i.id);
+
+      if (toDelete.length) {
+        await tx.delete(dict).where(inArray(dict.id, toDelete));
+      }
+    });
   },
 
   /** 删除字典 */

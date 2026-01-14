@@ -3,22 +3,22 @@ import { z } from "zod";
 import { STATUS } from "../../types/base";
 import { dictService } from "./dict.service";
 
-const CreateDictDTO = z.object({
+const DictItemDTO = z.object({
+  id: z.number().int().positive().optional(),
   label: z.string().min(1).max(100),
   value: z.string().min(1).max(100),
-  parentId: z.number().int().positive().nullable().optional(),
   sort: z.number().int().min(0).optional(),
   status: z.number().int().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
 });
 
-const UpdateDictDTO = z.object({
-  label: z.string().min(1).max(100).optional(),
-  value: z.string().min(1).max(100).optional(),
-  parentId: z.number().int().positive().nullable().optional(),
+const CreateDictDTO = z.object({
+  label: z.string().min(1).max(100),
+  value: z.string().min(1).max(100),
   sort: z.number().int().min(0).optional(),
   status: z.number().int().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
+  children: z.array(DictItemDTO).optional(),
 });
 
 export const dictController = {
@@ -26,50 +26,40 @@ export const dictController = {
   async create(req: Request, res: Response) {
     const parsed = CreateDictDTO.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
+      return res.status(400).json({ message: "参数验证失败" });
     }
 
-    const data = await dictService.create({
+    const data = await dictService.createWithChildren({
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       userId: req.user?.userId,
+      children: parsed.data.children?.map((it) => ({
+        ...it,
+        status: it.status as STATUS | undefined,
+      })),
     });
 
-    res.status(201).json({
-      message: "创建成功",
-      data,
-    });
+    res.status(201).json({ message: "创建成功", data });
   },
 
   /** 更新字典 */
   async update(req: Request, res: Response) {
-    const parsed = UpdateDictDTO.safeParse(req.body);
+    const parsed = CreateDictDTO.partial().safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
+      return res.status(400).json({ message: "参数验证失败" });
     }
 
-    const data = await dictService.update(Number(req.params.id), {
+    await dictService.updateWithChildren(Number(req.params.id), {
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       userId: req.user?.userId,
+      children: parsed.data.children?.map((it) => ({
+        ...it,
+        status: it.status as STATUS | undefined,
+      })),
     });
 
-    res.status(200).json({
-      message: "更新成功",
-      data,
-    });
+    res.status(200).json({ message: "更新成功" });
   },
 
   /** 删除字典 */
