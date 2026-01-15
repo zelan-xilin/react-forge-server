@@ -19,15 +19,15 @@ const DictItemSchema = z.object({
 });
 
 const CheckDictUniqueDTO = z.object({
-  label: z.string().min(1).max(100),
-  value: z.string().min(1).max(100),
+  label: z.string().max(100),
+  value: z.string().max(100),
   dictId: z.number().int().positive().optional(),
 });
 
 const CheckItemUniqueDTO = z.object({
   dictId: z.number().int().positive(),
-  label: z.string().min(1).max(100),
-  value: z.string().min(1).max(100),
+  label: z.string().max(100),
+  value: z.string().max(100),
   itemId: z.number().int().positive().optional(),
 });
 
@@ -122,7 +122,13 @@ export const dictController = {
   },
 
   async checkDictUnique(req: Request, res: Response) {
-    const parsed = CheckDictUniqueDTO.safeParse(req.query);
+    const query = {
+      dictId: req.query.dictId ? Number(req.query.dictId) : undefined,
+      label: req.query.label as string,
+      value: req.query.value as string,
+    };
+
+    const parsed = CheckDictUniqueDTO.safeParse(query);
     if (!parsed.success) {
       return res.status(400).json({
         message: '参数验证失败',
@@ -134,9 +140,9 @@ export const dictController = {
     }
 
     const result = await dictService.checkDictUnique(
-      parsed.data.label,
-      parsed.data.value,
-      parsed.data.dictId ? Number(parsed.data.dictId) : undefined,
+      query.label,
+      query.value,
+      query.dictId,
     );
 
     res.json({
@@ -158,7 +164,7 @@ export const dictController = {
     }
 
     const data = await dictService.createItem({
-      parentId: Number(req.params.parentId),
+      parentId: Number(req.params.dictId),
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       userId: req.user?.userId,
@@ -200,7 +206,13 @@ export const dictController = {
   },
 
   async checkItemUnique(req: Request, res: Response) {
-    const parsed = CheckItemUniqueDTO.safeParse(req.query);
+    const query = {
+      dictId: Number(req.query.dictId),
+      label: req.query.label as string,
+      value: req.query.value as string,
+      itemId: req.query.itemId ? Number(req.query.itemId) : undefined,
+    };
+    const parsed = CheckItemUniqueDTO.safeParse(query);
     if (!parsed.success) {
       return res.status(400).json({
         message: '参数验证失败',
@@ -212,10 +224,10 @@ export const dictController = {
     }
 
     const result = await dictService.checkItemUnique(
-      Number(parsed.data.dictId),
-      parsed.data.label,
-      parsed.data.value,
-      parsed.data.itemId ? Number(parsed.data.itemId) : undefined,
+      query.dictId,
+      query.label,
+      query.value,
+      query.itemId,
     );
 
     res.json({

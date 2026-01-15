@@ -7,39 +7,6 @@ export const dictRoutes = Router();
 dictRoutes.use(authGuard);
 
 dictRoutes.post('/', permissionGuard('dict:create'), dictController.createDict);
-dictRoutes.put(
-  '/:id',
-  permissionGuard('dict:update'),
-  dictController.updateDict,
-);
-dictRoutes.delete(
-  '/:id',
-  permissionGuard('dict:delete'),
-  dictController.deleteDict,
-);
-dictRoutes.get('/page', permissionGuard('dict:read'), dictController.pageDict);
-dictRoutes.get('/list', permissionGuard('dict:read'), dictController.listDict);
-dictRoutes.get(
-  '/:id',
-  permissionGuard('dict:read'),
-  dictController.getDictById,
-);
-
-dictRoutes.post(
-  '/:dictId/items',
-  permissionGuard('dict:create'),
-  dictController.createItem,
-);
-dictRoutes.put(
-  '/items/:itemId',
-  permissionGuard('dict:update'),
-  dictController.updateItem,
-);
-dictRoutes.delete(
-  '/items/:itemId',
-  permissionGuard('dict:delete'),
-  dictController.deleteItem,
-);
 
 dictRoutes.get(
   '/exists',
@@ -47,8 +14,47 @@ dictRoutes.get(
   dictController.checkDictUnique,
 );
 
+dictRoutes.get('/page', permissionGuard('dict:read'), dictController.pageDict);
+dictRoutes.get('/list', permissionGuard('dict:read'), dictController.listDict);
+
+dictRoutes.get(
+  '/:id',
+  permissionGuard('dict:read'),
+  dictController.getDictById,
+);
+
+dictRoutes.put(
+  '/:id',
+  permissionGuard('dict:update'),
+  dictController.updateDict,
+);
+
+dictRoutes.delete(
+  '/:id',
+  permissionGuard('dict:delete'),
+  dictController.deleteDict,
+);
+
 dictRoutes.get(
   '/items/exists',
   permissionGuard('dict:read'),
   dictController.checkItemUnique,
+);
+
+dictRoutes.post(
+  '/:dictId/items',
+  permissionGuard('dict:create'),
+  dictController.createItem,
+);
+
+dictRoutes.put(
+  '/items/:itemId',
+  permissionGuard('dict:update'),
+  dictController.updateItem,
+);
+
+dictRoutes.delete(
+  '/items/:itemId',
+  permissionGuard('dict:delete'),
+  dictController.deleteItem,
 );
