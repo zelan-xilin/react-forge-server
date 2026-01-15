@@ -1,8 +1,8 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import "./schema";
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import './schema';
 
-export const sqlite = new Database("rbac.db");
+export const sqlite = new Database('rbac.db');
 export const db = drizzle(sqlite);
 
 export function initDb() {
@@ -94,5 +94,5 @@ export function initDb() {
     );
   `);
 
-  console.log("Database initialized successfully");
+  console.log('Database initialized successfully');
 }

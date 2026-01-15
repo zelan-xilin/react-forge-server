@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../../config";
+import jwt from 'jsonwebtoken';
+import { JWT_EXPIRES_IN, JWT_SECRET } from '../../config';
 
 export const authService = {
   /** 生成 JWT */

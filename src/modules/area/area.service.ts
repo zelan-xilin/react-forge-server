@@ -1,8 +1,8 @@
-import { and, count, desc, eq, ne } from "drizzle-orm";
-import { alias } from "drizzle-orm/sqlite-core";
-import { db } from "../../db";
-import { user } from "../user/user.schema";
-import { areaPricingRule, areaResource } from "./area.schema";
+import { and, count, desc, eq, ne } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
+import { db } from '../../db';
+import { user } from '../user/user.schema';
+import { areaPricingRule, areaResource } from './area.schema';
 import {
   CreateAreaPricingRuleDTO,
   CreateAreaResourceDTO,
@@ -10,7 +10,7 @@ import {
   UpdateAreaPricingRuleDTO,
   UpdateAreaResourceData,
   UpdateAreaResourceDTO,
-} from "./types";
+} from './types';
 
 export const areaService = {
   /** 新增区域收费规则 */
@@ -97,8 +97,8 @@ export const areaService = {
 
   /** 区域收费规则列表 */
   listAreaPricingRules() {
-    const creatorAlias = alias(user, "creator");
-    const updaterAlias = alias(user, "updater");
+    const creatorAlias = alias(user, 'creator');
+    const updaterAlias = alias(user, 'updater');
     return db
       .select({
         id: areaPricingRule.id,
@@ -187,8 +187,8 @@ export const areaService = {
 
   /** 区域资源列表 */
   listAreaResources() {
-    const creatorAlias = alias(user, "creator");
-    const updaterAlias = alias(user, "updater");
+    const creatorAlias = alias(user, 'creator');
+    const updaterAlias = alias(user, 'updater');
     return db
       .select({
         id: areaResource.id,

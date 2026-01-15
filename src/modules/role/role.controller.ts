@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { roleService } from "./role.service";
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { roleService } from './role.service';
 
 const CreateRoleDTO = z.object({
-  name: z.string().min(1, "角色名不能为空").max(50, "角色名不能超过50个字符"),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+  name: z.string().min(1, '角色名不能为空').max(50, '角色名不能超过50个字符'),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
 
 const UpdateRoleDTO = z.object({
@@ -21,7 +21,7 @@ const SetActionPermissionsByRoleIdDTO = z.object({
     z.object({
       module: z.string(),
       action: z.string(),
-    })
+    }),
   ),
 });
 
@@ -31,9 +31,9 @@ export const roleController = {
     const parsed = CreateRoleDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -45,7 +45,7 @@ export const roleController = {
     });
 
     res.status(201).json({
-      message: "创建成功",
+      message: '创建成功',
       data,
     });
   },
@@ -55,9 +55,9 @@ export const roleController = {
     const parsed = UpdateRoleDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -69,7 +69,7 @@ export const roleController = {
     });
 
     res.status(200).json({
-      message: "更新成功",
+      message: '更新成功',
       data,
     });
   },
@@ -84,7 +84,7 @@ export const roleController = {
   async list(req: Request, res: Response) {
     const data = await roleService.list();
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
@@ -98,18 +98,18 @@ export const roleController = {
     };
     const data = await roleService.page(query);
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
 
   /** 验证角色名称是否存在 */
   async isRoleNameExists(req: Request, res: Response) {
-    const name = String(req.query.name || "");
+    const name = String(req.query.name || '');
     const roleId = req.query.roleId ? Number(req.query.roleId) : undefined;
     const exists = await roleService.isRoleNameExists(name, roleId);
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data: { exists },
     });
   },
@@ -118,7 +118,7 @@ export const roleController = {
   async getRoleByRoleId(req: Request, res: Response) {
     const data = await roleService.getRoleByRoleId(Number(req.params.id));
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
@@ -128,9 +128,9 @@ export const roleController = {
     const parsed = SetPathPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -138,10 +138,10 @@ export const roleController = {
 
     await roleService.setPathPermissionsByRoleId(
       Number(req.params.id),
-      parsed.data.paths
+      parsed.data.paths,
     );
     res.status(200).json({
-      message: "设置成功",
+      message: '设置成功',
       data: null,
     });
   },
@@ -149,10 +149,10 @@ export const roleController = {
   /** 获取角色路径权限 */
   async getPathPermissionsByRoleId(req: Request, res: Response) {
     const data = await roleService.getPathPermissionsByRoleId(
-      Number(req.params.id)
+      Number(req.params.id),
     );
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
@@ -162,9 +162,9 @@ export const roleController = {
     const parsed = SetActionPermissionsByRoleIdDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -172,10 +172,10 @@ export const roleController = {
 
     await roleService.setActionPermissionsByRoleId(
       Number(req.params.id),
-      parsed.data.permissions
+      parsed.data.permissions,
     );
     res.status(200).json({
-      message: "设置成功",
+      message: '设置成功',
       data: null,
     });
   },
@@ -183,10 +183,10 @@ export const roleController = {
   /** 获取角色操作权限 */
   async getActionPermissionsByRoleId(req: Request, res: Response) {
     const data = await roleService.getActionPermissionsByRoleId(
-      Number(req.params.id)
+      Number(req.params.id),
     );
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },

@@ -1,22 +1,20 @@
-import { NextFunction, Request, Response } from "express";
-import { authService } from "../modules/auth/auth.service";
-import { roleService } from "../modules/role/role.service";
-import { userService } from "../modules/user/user.service";
-import { IS_ADMIN } from "../types/base";
+import { NextFunction, Request, Response } from 'express';
+import { authService } from '../modules/auth/auth.service';
+import { roleService } from '../modules/role/role.service';
+import { userService } from '../modules/user/user.service';
+import { IS_ADMIN } from '../types/base';
 
 export async function authGuard(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
+  const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
-    return res
-      .status(401)
-      .json({
-        message: "未登录，请先登录",
-        data: null
-      });
+    return res.status(401).json({
+      message: '未登录，请先登录',
+      data: null,
+    });
   }
 
   try {
@@ -24,20 +22,18 @@ export async function authGuard(
 
     const userData = await userService.getUserByUserId(uid);
     if (!userData) {
-      return res
-        .status(401)
-        .json({
-          message: "用户不存在",
-          data: null
-        });
+      return res.status(401).json({
+        message: '用户不存在',
+        data: null,
+      });
     }
 
     let actions: string[] = [];
     if (userData.roleId && userData.isAdmin !== IS_ADMIN.YES) {
       const perms = await roleService.getActionPermissionsByRoleId(
-        userData.roleId
+        userData.roleId,
       );
-      actions = perms.map((p) => `${p.module}:${p.action}`);
+      actions = perms.map(p => `${p.module}:${p.action}`);
     }
 
     req.user = {
@@ -51,11 +47,9 @@ export async function authGuard(
 
     next();
   } catch {
-    res
-      .status(401)
-      .json({
-        message: "无效的登录状态，请重新登录",
-        data: null
-      });
+    res.status(401).json({
+      message: '无效的登录状态，请重新登录',
+      data: null,
+    });
   }
 }

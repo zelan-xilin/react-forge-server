@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { IS_ADMIN, STATUS } from "../../types/base";
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { IS_ADMIN, STATUS } from '../../types/base';
 import { roleService } from '../role/role.service';
-import { userService } from "../user/user.service";
-import { authService } from "./auth.service";
+import { userService } from '../user/user.service';
+import { authService } from './auth.service';
 
 const LoginDTO = z.object({
-  username: z.string().min(1, "用户名不能为空"),
-  password: z.string().min(6, "密码至少 6 位"),
+  username: z.string().min(1, '用户名不能为空'),
+  password: z.string().min(6, '密码至少 6 位'),
 });
 
 export const authController = {
@@ -16,40 +16,34 @@ export const authController = {
     const parsed = LoginDTO.safeParse(req.body);
 
     if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => ({
-        field: issue.path.join("."),
+      const errors = parsed.error.issues.map(issue => ({
+        field: issue.path.join('.'),
         message: issue.message,
       }));
-      return res
-        .status(400)
-        .json({
-          message: "参数验证失败",
-          data: errors
-        });
+      return res.status(400).json({
+        message: '参数验证失败',
+        data: errors,
+      });
     }
 
     const { username, password } = parsed.data;
     const user = await userService.verifyUser(username, password);
     if (!user) {
-      return res
-        .status(401)
-        .json({
-          message: "用户名或密码错误",
-          data: null
-        });
+      return res.status(401).json({
+        message: '用户名或密码错误',
+        data: null,
+      });
     }
 
     if (user.status !== STATUS.ENABLE) {
-      return res
-        .status(403)
-        .json({
-          message: "账号已被禁用",
-          data: null
-        });
+      return res.status(403).json({
+        message: '账号已被禁用',
+        data: null,
+      });
     }
 
-    let actions: { module: string; action: string; }[] = []
-    let paths: string[] = []
+    let actions: { module: string; action: string }[] = [];
+    let paths: string[] = [];
     if (user.roleId && user.isAdmin !== IS_ADMIN.YES) {
       try {
         [actions, paths] = await Promise.all([
@@ -62,21 +56,21 @@ export const authController = {
     }
 
     const token = authService.sign(user.id);
-    const { passwordHash, ...safeUser } = user;
     const data = {
       token,
-      user: safeUser,
+      user: {
+        ...user,
+        passwordHash: undefined,
+      },
       permissions: {
         actions,
         paths,
       },
-    }
+    };
 
-    res
-      .status(200)
-      .json({
-        message: "登录成功",
-        data
-      });
+    res.status(200).json({
+      message: '登录成功',
+      data,
+    });
   },
 };

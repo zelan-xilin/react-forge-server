@@ -1,4 +1,4 @@
-import { IS_ADMIN, STATUS } from "../../types/base";
+import { IS_ADMIN, STATUS } from '../../types/base';
 
 export interface CreateUserDTO {
   username: string;

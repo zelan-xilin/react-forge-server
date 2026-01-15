@@ -8,162 +8,106 @@ import {
   isNull,
   like,
   ne,
-} from "drizzle-orm";
-import { db } from "../../db";
-import { STATUS } from "../../types/base";
-import { dict } from "../dict/dict.schema";
-import {
-  CreateDictWithChildrenDTO,
-  PageQueryDTO,
-  UpdateDictWithChildrenDTO,
-} from "./types";
+  or,
+} from 'drizzle-orm';
+import { db } from '../../db';
+import { STATUS } from '../../types/base';
+import { dict } from './dict.schema';
+import { DictDTO, DictItemDTO, DictPageQueryDTO } from './types';
+
+function buildChildrenMap(children: DictItemDTO[]) {
+  const map = new Map<number, DictItemDTO[]>();
+
+  for (const child of children) {
+    if (!map.has(child.parentId)) {
+      map.set(child.parentId, []);
+    }
+    map.get(child.parentId)!.push(child);
+  }
+
+  return map;
+}
 
 export const dictService = {
-  /** 新增字典 */
-  async createWithChildren(data: CreateDictWithChildrenDTO) {
-    return db.transaction(async (tx) => {
-      const [parent] = await tx
-        .insert(dict)
-        .values({
-          label: data.label,
-          value: data.value,
-          parentId: null,
-          sort: data.sort,
-          status: data.status ?? STATUS.ENABLE,
-          description: data.description,
-          createdBy: data.userId,
-        })
-        .returning();
-
-      if (data.children?.length) {
-        await tx.insert(dict).values(
-          data.children.map((item) => ({
-            label: item.label,
-            value: item.value,
-            parentId: parent.id,
-            sort: item.sort,
-            status: item.status ?? STATUS.ENABLE,
-            description: item.description,
-            createdBy: data.userId,
-          }))
-        );
-      }
-
-      return parent;
-    });
-  },
-
-  /** 更新字典 */
-  async updateWithChildren(id: number, data: UpdateDictWithChildrenDTO) {
-    return db.transaction(async (tx) => {
-      await tx
-        .update(dict)
-        .set({
-          label: data.label,
-          value: data.value,
-          sort: data.sort,
-          status: data.status,
-          description: data.description,
-          updatedBy: data.userId,
-          updatedAt: new Date(),
-        })
-        .where(eq(dict.id, id));
-
-      if (!data.children) {
-        return;
-      }
-
-      const existing = await tx
-        .select()
-        .from(dict)
-        .where(eq(dict.parentId, id));
-
-      const incomingIds = new Set<number>();
-
-      for (const item of data.children) {
-        if (item.id) {
-          incomingIds.add(item.id);
-          await tx
-            .update(dict)
-            .set({
-              label: item.label,
-              value: item.value,
-              sort: item.sort,
-              status: item.status,
-              description: item.description,
-              updatedBy: data.userId,
-              updatedAt: new Date(),
-            })
-            .where(eq(dict.id, item.id));
-        } else {
-          await tx.insert(dict).values({
-            label: item.label,
-            value: item.value,
-            parentId: id,
-            sort: item.sort,
-            status: item.status ?? STATUS.ENABLE,
-            description: item.description,
-            createdBy: data.userId,
-          });
-        }
-      }
-
-      const toDelete = existing
-        .filter((i) => !incomingIds.has(i.id))
-        .map((i) => i.id);
-
-      if (toDelete.length) {
-        await tx.delete(dict).where(inArray(dict.id, toDelete));
-      }
-    });
-  },
-
-  /** 删除字典 */
-  async delete(id: number) {
-    return db.transaction(async (tx) => {
-      const dictToDelete = await tx
-        .select({ id: dict.id, parentId: dict.parentId })
-        .from(dict)
-        .where(eq(dict.id, id))
-        .limit(1);
-
-      if (!dictToDelete.length) {
-        return 0;
-      }
-
-      const item = dictToDelete[0];
-
-      if (item.parentId === null) {
-        await tx.delete(dict).where(
-          inArray(dict.id, [
-            id,
-            ...(await tx
-              .select({ id: dict.id })
-              .from(dict)
-              .where(eq(dict.parentId, id))
-              .then((res) => res.map((r) => r.id))),
-          ])
-        );
-      } else {
-        await tx.delete(dict).where(eq(dict.id, id));
-      }
-    });
-  },
-
-  /** 字典列表 */
-  async list() {
-    const parents = await db
-      .select({
-        id: dict.id,
-        label: dict.label,
-        value: dict.value,
-        parentId: dict.parentId,
-        sort: dict.sort,
-        status: dict.status,
-        description: dict.description,
-        createdAt: dict.createdAt,
-        updatedAt: dict.updatedAt,
+  async createDict(data: DictDTO & { userId?: number }) {
+    return db
+      .insert(dict)
+      .values({
+        label: data.label,
+        value: data.value,
+        parentId: null,
+        status: data.status ?? STATUS.ENABLE,
+        description: data.description,
+        createdBy: data.userId,
       })
+      .returning();
+  },
+
+  async updateDict(id: number, data: Partial<DictDTO> & { userId?: number }) {
+    await db
+      .update(dict)
+      .set({
+        label: data.label,
+        value: data.value,
+        status: data.status,
+        description: data.description,
+        updatedBy: data.userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(dict.id, id));
+  },
+
+  async deleteDict(id: number) {
+    await db.delete(dict).where(eq(dict.id, id));
+    await db.delete(dict).where(eq(dict.parentId, id));
+  },
+
+  async pageDict(data: DictPageQueryDTO) {
+    const conditions = [isNull(dict.parentId)];
+
+    if (data.label) {
+      conditions.push(like(dict.label, `%${data.label}%`));
+    }
+
+    const where = and(...conditions);
+
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(dict)
+      .where(where);
+
+    const parents = await db
+      .select()
+      .from(dict)
+      .where(where)
+      .orderBy(desc(dict.createdAt))
+      .limit(data.pageSize)
+      .offset((data.page - 1) * data.pageSize);
+
+    if (!parents.length) {
+      return { records: [], total };
+    }
+
+    const parentIds = parents.map(p => p.id);
+
+    const children = await db
+      .select()
+      .from(dict)
+      .where(inArray(dict.parentId, parentIds))
+      .orderBy(asc(dict.sort), asc(dict.id));
+
+    const childrenMap = buildChildrenMap(children as DictItemDTO[]);
+
+    const records = parents.map(p => ({
+      ...p,
+      children: childrenMap.get(p.id) ?? [],
+    }));
+
+    return { records, total };
+  },
+  async listDict() {
+    const parents = await db
+      .select()
       .from(dict)
       .where(isNull(dict.parentId))
       .orderBy(desc(dict.createdAt));
@@ -172,129 +116,131 @@ export const dictService = {
       return [];
     }
 
-    const parentIds = parents.map((p) => p.id);
+    const parentIds = parents.map(p => p.id);
 
     const children = await db
-      .select({
-        id: dict.id,
-        label: dict.label,
-        value: dict.value,
-        parentId: dict.parentId,
-        sort: dict.sort,
-        status: dict.status,
-        description: dict.description,
-        createdAt: dict.createdAt,
-        updatedAt: dict.updatedAt,
-      })
+      .select()
       .from(dict)
       .where(inArray(dict.parentId, parentIds))
-      .orderBy(asc(dict.sort), asc(dict.id));
+      .orderBy(asc(dict.sort));
 
-    const childrenMap = new Map<number, any[]>();
+    const childrenMap = buildChildrenMap(children as DictItemDTO[]);
 
-    for (const child of children) {
-      if (!childrenMap.has(child.parentId!)) {
-        childrenMap.set(child.parentId!, []);
-      }
-      childrenMap.get(child.parentId!)!.push(child);
-    }
-
-    return parents.map((parent) => ({
-      ...parent,
-      children: childrenMap.get(parent.id) ?? [],
+    return parents.map(p => ({
+      ...p,
+      children: childrenMap.get(p.id) ?? [],
     }));
   },
 
-  /** 字典分页 */
-  async page(data: PageQueryDTO) {
-    const conditions = [isNull(dict.parentId)];
-    if (data.label) {
-      conditions.push(like(dict.label, `%${data.label}%`));
-    }
-    const whereClause = and(...conditions);
-
-    const [{ total }] = await db
-      .select({ total: count() })
+  async getDictById(id: number) {
+    const parent = await db
+      .select()
       .from(dict)
-      .where(whereClause);
+      .where(and(eq(dict.id, id), isNull(dict.parentId)))
+      .limit(1);
 
-    const parents = await db
-      .select({
-        id: dict.id,
-        label: dict.label,
-        value: dict.value,
-        parentId: dict.parentId,
-        sort: dict.sort,
-        status: dict.status,
-        description: dict.description,
-        createdBy: dict.createdBy,
-        createdAt: dict.createdAt,
-        updatedBy: dict.updatedBy,
-        updatedAt: dict.updatedAt,
-      })
-      .from(dict)
-      .where(whereClause)
-      .orderBy(desc(dict.createdAt))
-      .limit(data.pageSize)
-      .offset((data.page - 1) * data.pageSize);
-
-    const parentIds = parents.map((p) => p.id);
-    const children = parentIds.length
-      ? await db
-          .select({
-            id: dict.id,
-            label: dict.label,
-            value: dict.value,
-            parentId: dict.parentId,
-            sort: dict.sort,
-            status: dict.status,
-            description: dict.description,
-            createdBy: dict.createdBy,
-            createdAt: dict.createdAt,
-            updatedBy: dict.updatedBy,
-            updatedAt: dict.updatedAt,
-          })
-          .from(dict)
-          .where(inArray(dict.parentId, parentIds))
-          .orderBy(asc(dict.sort), asc(dict.id))
-      : [];
-
-    const childrenMap = new Map<number, any[]>();
-
-    for (const child of children) {
-      if (!childrenMap.has(child.parentId!)) {
-        childrenMap.set(child.parentId!, []);
-      }
-      childrenMap.get(child.parentId!)!.push(child);
+    if (!parent.length) {
+      return null;
     }
 
-    const records = parents.map((parent) => ({
-      ...parent,
-      children: childrenMap.get(parent.id) ?? [],
-    }));
+    const children = await db
+      .select()
+      .from(dict)
+      .where(eq(dict.parentId, id))
+      .orderBy(asc(dict.sort));
 
-    return { records, total };
+    return {
+      ...parent[0],
+      children,
+    };
   },
+  async checkDictUnique(label: string, value: string, dictId?: number) {
+    const conditions = [
+      isNull(dict.parentId),
+      or(eq(dict.label, label), eq(dict.value, value)),
+    ];
 
-  /** 检查字典名是否存在 */
-  async isDictLabelExists(label: string, dictId?: number) {
-    const conditions = [eq(dict.label, label), isNull(dict.parentId)];
-
-    if (dictId !== undefined) {
+    if (dictId) {
       conditions.push(ne(dict.id, dictId));
     }
 
-    const [{ count: total }] = await db
-      .select({ count: count() })
+    const rows = await db
+      .select({
+        label: dict.label,
+        value: dict.value,
+      })
       .from(dict)
       .where(and(...conditions));
 
-    return total > 0;
+    return {
+      labelExists: rows.some(r => r.label === label),
+      valueExists: rows.some(r => r.value === value),
+    };
   },
 
-  /** 根据字典ID获取字典 */
-  async getDictById(id: number) {
-    const result = await db.select().from(dict).where(eq(dict.id, id)).limit(1);
-    return result[0] || null;
+  async createItem(data: DictItemDTO & { userId?: number }) {
+    return db
+      .insert(dict)
+      .values({
+        parentId: data.parentId,
+        label: data.label,
+        value: data.value,
+        sort: data.sort,
+        status: data.status ?? STATUS.ENABLE,
+        description: data.description,
+        createdBy: data.userId,
+      })
+      .returning();
+  },
+
+  async updateItem(
+    id: number,
+    data: Partial<DictItemDTO> & { userId?: number },
+  ) {
+    await db
+      .update(dict)
+      .set({
+        label: data.label,
+        value: data.value,
+        sort: data.sort,
+        status: data.status,
+        description: data.description,
+        updatedBy: data.userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(dict.id, id));
+  },
+
+  async deleteItem(id: number) {
+    await db.delete(dict).where(eq(dict.id, id));
+  },
+
+  async checkItemUnique(
+    dictId: number,
+    label: string,
+    value: string,
+    itemId?: number,
+  ) {
+    const conditions = [
+      eq(dict.parentId, dictId),
+      or(eq(dict.label, label), eq(dict.value, value)),
+    ];
+
+    if (itemId) {
+      conditions.push(ne(dict.id, itemId));
+    }
+
+    const rows = await db
+      .select({
+        label: dict.label,
+        value: dict.value,
+      })
+      .from(dict)
+      .where(and(...conditions));
+
+    return {
+      labelExists: rows.some(r => r.label === label),
+      valueExists: rows.some(r => r.value === value),
+    };
   },
 };

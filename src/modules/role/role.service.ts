@@ -1,14 +1,14 @@
-import { and, count, desc, eq, like, ne } from "drizzle-orm";
-import { alias } from "drizzle-orm/sqlite-core";
-import { db } from "../../db";
-import { user } from "../user/user.schema";
-import { role, roleActionPermission, rolePathPermission } from "./role.schema";
+import { and, count, desc, eq, like, ne } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
+import { db } from '../../db';
+import { user } from '../user/user.schema';
+import { role, roleActionPermission, rolePathPermission } from './role.schema';
 import {
   CreateRoleDTO,
   PageQueryDTO,
   UpdateRoleData,
   UpdateRoleDTO,
-} from "./types";
+} from './types';
 
 export const roleService = {
   /** 新增角色 */
@@ -81,8 +81,8 @@ export const roleService = {
       .from(role)
       .where(whereClause);
 
-    const creatorAlias = alias(user, "creator");
-    const updaterAlias = alias(user, "updater");
+    const creatorAlias = alias(user, 'creator');
+    const updaterAlias = alias(user, 'updater');
     const records = await db
       .select({
         id: role.id,
@@ -134,7 +134,7 @@ export const roleService = {
     if (paths.length) {
       await db
         .insert(rolePathPermission)
-        .values(paths.map((p) => ({ roleId, path: p })));
+        .values(paths.map(p => ({ roleId, path: p })));
     }
   },
 
@@ -144,13 +144,13 @@ export const roleService = {
       .select()
       .from(rolePathPermission)
       .where(eq(rolePathPermission.roleId, roleId));
-    return records.map((i) => i.path);
+    return records.map(i => i.path);
   },
 
   /** 设置角色操作权限 */
   async setActionPermissionsByRoleId(
     roleId: number,
-    permissions: { module: string; action: string }[]
+    permissions: { module: string; action: string }[],
   ) {
     await db
       .delete(roleActionPermission)
@@ -158,11 +158,11 @@ export const roleService = {
 
     if (permissions.length) {
       await db.insert(roleActionPermission).values(
-        permissions.map((p) => ({
+        permissions.map(p => ({
           roleId,
           module: p.module,
           action: p.action,
-        }))
+        })),
       );
     }
   },
@@ -173,6 +173,6 @@ export const roleService = {
       .select()
       .from(roleActionPermission)
       .where(eq(roleActionPermission.roleId, roleId));
-    return records.map((i) => ({ module: i.module, action: i.action }));
+    return records.map(i => ({ module: i.module, action: i.action }));
   },
 };

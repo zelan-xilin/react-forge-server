@@ -1,24 +1,24 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { IS_ADMIN, STATUS } from "../../types/base";
-import { userService } from "./user.service";
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { IS_ADMIN, STATUS } from '../../types/base';
+import { userService } from './user.service';
 
 const CreateUserDTO = z.object({
   username: z
     .string()
-    .min(3, "用户名至少3个字符")
-    .max(50, "用户名不能超过50个字符"),
+    .min(3, '用户名至少3个字符')
+    .max(50, '用户名不能超过50个字符'),
   password: z
     .string()
-    .min(6, "密码至少6个字符")
-    .max(100, "密码不能超过100个字符"),
-  roleId: z.number().int().positive("角色ID必须为正整数").optional(),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+    .min(6, '密码至少6个字符')
+    .max(100, '密码不能超过100个字符'),
+  roleId: z.number().int().positive('角色ID必须为正整数').optional(),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
   status: z.number().int().min(0).max(1).optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
   phone: z
     .string()
-    .regex(/^1[3-9]\d{9}$/, "手机号格式不正确")
+    .regex(/^1[3-9]\d{9}$/, '手机号格式不正确')
     .optional(),
 });
 
@@ -31,14 +31,14 @@ const UpdateUserDTO = z.object({
   isAdmin: z.number().int().min(0).max(1).optional(),
   phone: z
     .string()
-    .regex(/^1[3-9]\d{9}$/, "手机号格式不正确")
+    .regex(/^1[3-9]\d{9}$/, '手机号格式不正确')
     .nullable()
     .optional(),
 });
 
 const ValidateCredentialsDTO = z.object({
-  username: z.string().min(3, "用户名至少3个字符"),
-  password: z.string().min(6, "密码至少6个字符"),
+  username: z.string().min(3, '用户名至少3个字符'),
+  password: z.string().min(6, '密码至少6个字符'),
 });
 
 export const userController = {
@@ -47,9 +47,9 @@ export const userController = {
     const parsed = CreateUserDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -63,7 +63,7 @@ export const userController = {
     });
 
     res.status(201).json({
-      message: "创建成功",
+      message: '创建成功',
       data,
     });
   },
@@ -73,9 +73,9 @@ export const userController = {
     const parsed = UpdateUserDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -89,7 +89,7 @@ export const userController = {
     });
 
     res.status(200).json({
-      message: "更新成功",
+      message: '更新成功',
       data,
     });
   },
@@ -103,9 +103,12 @@ export const userController = {
   /** 用户列表 */
   async list(req: Request, res: Response) {
     const data = await userService.list();
-    const safeList = data.map(({ passwordHash, ...rest }) => rest);
+    const safeList = data.map(it => ({
+      ...it,
+      passwordHash: undefined,
+    }));
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data: safeList,
     });
   },
@@ -123,9 +126,12 @@ export const userController = {
     };
 
     const { records, total } = await userService.page(query);
-    const safeList = records.map(({ passwordHash, ...rest }) => rest);
+    const safeList = records.map(it => ({
+      ...it,
+      passwordHash: undefined,
+    }));
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data: { records: safeList, total },
     });
   },
@@ -137,7 +143,7 @@ export const userController = {
     const exists = await userService.isUsernameExists(username, userId);
 
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data: { exists },
     });
   },
@@ -147,9 +153,9 @@ export const userController = {
     const parsed = ValidateCredentialsDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        errors: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        errors: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -160,15 +166,17 @@ export const userController = {
 
     if (!user) {
       return res.status(401).json({
-        message: "用户名或密码错误",
+        message: '用户名或密码错误',
         data: null,
       });
     }
 
-    const { passwordHash, ...safeUser } = user;
     res.status(200).json({
-      message: "验证成功",
-      data: safeUser,
+      message: '验证成功',
+      data: {
+        ...user,
+        passwordHash: undefined,
+      },
     });
   },
 
@@ -178,15 +186,17 @@ export const userController = {
 
     if (!data) {
       return res.status(200).json({
-        message: "查询成功",
+        message: '查询成功',
         data: null,
       });
     }
 
-    const { passwordHash, ...safeUser } = data;
     res.status(200).json({
-      message: "查询成功",
-      data: safeUser,
+      message: '查询成功',
+      data: {
+        ...data,
+        passwordHash: undefined,
+      },
     });
   },
 };

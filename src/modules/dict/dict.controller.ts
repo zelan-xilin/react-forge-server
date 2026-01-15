@@ -1,115 +1,226 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { STATUS } from "../../types/base";
-import { dictService } from "./dict.service";
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { STATUS } from '../../types/base';
+import { dictService } from './dict.service';
 
-const DictItemDTO = z.object({
-  id: z.number().int().positive().optional(),
+const DictSchema = z.object({
   label: z.string().min(1).max(100),
   value: z.string().min(1).max(100),
-  sort: z.number().int().min(0).optional(),
-  status: z.number().int().min(0).max(1).optional(),
+  status: z.number().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
 });
 
-const CreateDictDTO = z.object({
+const DictItemSchema = z.object({
   label: z.string().min(1).max(100),
   value: z.string().min(1).max(100),
   sort: z.number().int().min(0).optional(),
-  status: z.number().int().min(0).max(1).optional(),
+  status: z.number().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
-  children: z.array(DictItemDTO).optional(),
+});
+
+const CheckDictUniqueDTO = z.object({
+  label: z.string().min(1).max(100),
+  value: z.string().min(1).max(100),
+  dictId: z.number().int().positive().optional(),
+});
+
+const CheckItemUniqueDTO = z.object({
+  dictId: z.number().int().positive(),
+  label: z.string().min(1).max(100),
+  value: z.string().min(1).max(100),
+  itemId: z.number().int().positive().optional(),
 });
 
 export const dictController = {
-  /** 新增字典 */
-  async create(req: Request, res: Response) {
-    const parsed = CreateDictDTO.safeParse(req.body);
+  async createDict(req: Request, res: Response) {
+    const parsed = DictSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ message: "参数验证失败" });
+      return res.status(400).json({
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
     }
 
-    const data = await dictService.createWithChildren({
+    const data = await dictService.createDict({
       ...parsed.data,
       status: parsed.data.status as STATUS | undefined,
       userId: req.user?.userId,
-      children: parsed.data.children?.map((it) => ({
-        ...it,
-        status: it.status as STATUS | undefined,
-      })),
     });
 
-    res.status(201).json({ message: "创建成功", data });
-  },
-
-  /** 更新字典 */
-  async update(req: Request, res: Response) {
-    const parsed = CreateDictDTO.partial().safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ message: "参数验证失败" });
-    }
-
-    await dictService.updateWithChildren(Number(req.params.id), {
-      ...parsed.data,
-      status: parsed.data.status as STATUS | undefined,
-      userId: req.user?.userId,
-      children: parsed.data.children?.map((it) => ({
-        ...it,
-        status: it.status as STATUS | undefined,
-      })),
-    });
-
-    res.status(200).json({ message: "更新成功" });
-  },
-
-  /** 删除字典 */
-  async delete(req: Request, res: Response) {
-    await dictService.delete(Number(req.params.id));
-    res.status(204).send();
-  },
-
-  /** 字典列表 */
-  async list(req: Request, res: Response) {
-    const data = await dictService.list();
-    res.status(200).json({
-      message: "查询成功",
+    res.status(201).json({
+      message: '创建成功',
       data,
     });
   },
 
-  /** 字典分页 */
-  async page(req: Request, res: Response) {
-    const query = {
-      label: req.query.label as string | undefined,
-      page: req.query.page ? Number(req.query.page) : 1,
-      pageSize: req.query.pageSize ? Number(req.query.pageSize) : 10,
-    };
+  async updateDict(req: Request, res: Response) {
+    const parsed = DictSchema.partial().safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
 
-    const { records, total } = await dictService.page(query);
-    res.status(200).json({
-      message: "查询成功",
+    await dictService.updateDict(Number(req.params.id), {
+      ...parsed.data,
+      status: parsed.data.status as STATUS | undefined,
+      userId: req.user?.userId,
+    });
+
+    res.json({
+      message: '更新成功',
+      data: null,
+    });
+  },
+
+  async deleteDict(req: Request, res: Response) {
+    await dictService.deleteDict(Number(req.params.id));
+    res.status(204).send();
+  },
+
+  async pageDict(req: Request, res: Response) {
+    const { records, total } = await dictService.pageDict({
+      label: req.query.label as string,
+      page: Number(req.query.page || 1),
+      pageSize: Number(req.query.pageSize || 10),
+    });
+
+    res.json({
+      message: '查询成功',
       data: { records, total },
     });
   },
 
-  /** 检查字典名是否存在 */
-  async isDictLabelExists(req: Request, res: Response) {
-    const label = req.query.label as string;
-    const dictId = req.query.dictId ? Number(req.query.dictId) : undefined;
-    const exists = await dictService.isDictLabelExists(label, dictId);
-    res.status(200).json({
-      message: "查询成功",
-      data: { exists },
+  async listDict(req: Request, res: Response) {
+    const data = await dictService.listDict();
+    res.json({
+      message: '查询成功',
+      data,
     });
   },
 
-  /** 根据字典ID获取字典 */
   async getDictById(req: Request, res: Response) {
     const data = await dictService.getDictById(Number(req.params.id));
+    if (!data) {
+      return res.status(404).json({
+        message: '字典不存在',
+        data: null,
+      });
+    }
 
-    res.status(200).json({
-      message: "查询成功",
+    res.json({
+      message: '查询成功',
       data,
+    });
+  },
+
+  async checkDictUnique(req: Request, res: Response) {
+    const parsed = CheckDictUniqueDTO.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: '参数验证失败',
+        errors: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const result = await dictService.checkDictUnique(
+      parsed.data.label,
+      parsed.data.value,
+      parsed.data.dictId ? Number(parsed.data.dictId) : undefined,
+    );
+
+    res.json({
+      message: '查询成功',
+      data: result,
+    });
+  },
+
+  async createItem(req: Request, res: Response) {
+    const parsed = DictItemSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const data = await dictService.createItem({
+      parentId: Number(req.params.parentId),
+      ...parsed.data,
+      status: parsed.data.status as STATUS | undefined,
+      userId: req.user?.userId,
+    });
+
+    res.status(201).json({
+      message: '创建成功',
+      data,
+    });
+  },
+
+  async updateItem(req: Request, res: Response) {
+    const parsed = DictItemSchema.partial().safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    await dictService.updateItem(Number(req.params.itemId), {
+      ...parsed.data,
+      status: parsed.data.status as STATUS | undefined,
+      userId: req.user?.userId,
+    });
+
+    res.json({
+      message: '更新成功',
+      data: null,
+    });
+  },
+
+  async deleteItem(req: Request, res: Response) {
+    await dictService.deleteItem(Number(req.params.itemId));
+    res.status(204).send();
+  },
+
+  async checkItemUnique(req: Request, res: Response) {
+    const parsed = CheckItemUniqueDTO.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: '参数验证失败',
+        errors: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const result = await dictService.checkItemUnique(
+      Number(parsed.data.dictId),
+      parsed.data.label,
+      parsed.data.value,
+      parsed.data.itemId ? Number(parsed.data.itemId) : undefined,
+    );
+
+    res.json({
+      message: '查询成功',
+      data: result,
     });
   },
 };

@@ -1,16 +1,16 @@
-import bcrypt from "bcryptjs";
-import { and, count, desc, eq, like, ne } from "drizzle-orm";
-import { alias } from "drizzle-orm/sqlite-core";
-import { db } from "../../db";
-import { IS_ADMIN, STATUS } from "../../types/base";
-import { role } from "../role/role.schema";
+import bcrypt from 'bcryptjs';
+import { and, count, desc, eq, like, ne } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
+import { db } from '../../db';
+import { IS_ADMIN, STATUS } from '../../types/base';
+import { role } from '../role/role.schema';
 import {
   CreateUserDTO,
   PageQueryDTO,
   UpdateUserData,
   UpdateUserDTO,
-} from "./types";
-import { user } from "./user.schema";
+} from './types';
+import { user } from './user.schema';
 
 export const userService = {
   /** 新增用户 */
@@ -102,8 +102,8 @@ export const userService = {
       .from(user)
       .where(whereClause);
 
-    const creatorAlias = alias(user, "creator");
-    const updaterAlias = alias(user, "updater");
+    const creatorAlias = alias(user, 'creator');
+    const updaterAlias = alias(user, 'updater');
     const records = await db
       .select({
         id: user.id,

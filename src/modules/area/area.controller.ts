@@ -1,20 +1,20 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import { areaService } from "./area.service";
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { areaService } from './area.service';
 
 const CreateAreaPricingRuleDTO = z.object({
-  areaType: z.string().min(1, "区域类型不能为空"),
+  areaType: z.string().min(1, '区域类型不能为空'),
   roomSize: z.string().optional(),
-  timeType: z.string().min(1, "应用时间不能为空"),
-  startTimeFrom: z.string().min(1, "应用时间起始不能为空"),
-  baseDurationMinutes: z.number().min(1, "使用时长必须大于0"),
-  basePrice: z.number().min(0, "起步价格不能为负数"),
-  overtimePricePerHour: z.number().min(0, "超时每小时价格不能为负数"),
-  overtimeRounding: z.string().min(1, "超时取整方式不能为空"),
-  overtimeGraceMinutes: z.number().min(0, "超时宽限分钟不能为负数").optional(),
-  giftTeaAmount: z.number().min(0, "赠送茶水金额不能为负数").optional(),
+  timeType: z.string().min(1, '应用时间不能为空'),
+  startTimeFrom: z.string().min(1, '应用时间起始不能为空'),
+  baseDurationMinutes: z.number().min(1, '使用时长必须大于0'),
+  basePrice: z.number().min(0, '起步价格不能为负数'),
+  overtimePricePerHour: z.number().min(0, '超时每小时价格不能为负数'),
+  overtimeRounding: z.string().min(1, '超时取整方式不能为空'),
+  overtimeGraceMinutes: z.number().min(0, '超时宽限分钟不能为负数').optional(),
+  giftTeaAmount: z.number().min(0, '赠送茶水金额不能为负数').optional(),
   status: z.number().min(0).max(1).optional(),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
 
 const UpdateAreaPricingRuleDTO = z.object({
@@ -23,41 +23,41 @@ const UpdateAreaPricingRuleDTO = z.object({
   timeType: z.string().optional(),
   startTimeFrom: z.string().optional(),
   baseDurationMinutes: z.number().optional(),
-  basePrice: z.number().min(0, "起步价格不能为负数").optional(),
+  basePrice: z.number().min(0, '起步价格不能为负数').optional(),
   overtimePricePerHour: z
     .number()
-    .min(0, "超时每小时价格不能为负数")
+    .min(0, '超时每小时价格不能为负数')
     .optional(),
   overtimeRounding: z.string().optional(),
   overtimeGraceMinutes: z.number().optional(),
   giftTeaAmount: z.number().optional(),
   status: z.number().min(0).max(1).optional(),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
 
 const CerateAreaResourceDTO = z.object({
   name: z
     .string()
-    .min(1, "资源名称不能为空")
-    .max(50, "资源名称不能超过50个字符"),
-  areaType: z.string().min(1, "区域类型不能为空"),
+    .min(1, '资源名称不能为空')
+    .max(50, '资源名称不能超过50个字符'),
+  areaType: z.string().min(1, '区域类型不能为空'),
   roomSize: z.string().optional(),
-  capacity: z.number().min(0, "容量不能为负数").optional(),
+  capacity: z.number().min(0, '容量不能为负数').optional(),
   status: z.number().min(0).max(1).optional(),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
 
 const UpdateAreaResourceDTO = z.object({
   name: z
     .string()
-    .min(1, "资源名称不能为空")
-    .max(50, "资源名称不能超过50个字符")
+    .min(1, '资源名称不能为空')
+    .max(50, '资源名称不能超过50个字符')
     .optional(),
   areaType: z.string().optional(),
   roomSize: z.string().optional(),
   capacity: z.number().optional(),
   status: z.number().min(0).max(1).optional(),
-  description: z.string().max(200, "描述不能超过200个字符").optional(),
+  description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
 
 export const areaController = {
@@ -66,9 +66,9 @@ export const areaController = {
     const parsed = CreateAreaPricingRuleDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -80,7 +80,7 @@ export const areaController = {
     });
 
     res.status(201).json({
-      message: "创建成功",
+      message: '创建成功',
       data,
     });
   },
@@ -90,9 +90,9 @@ export const areaController = {
     const parsed = UpdateAreaPricingRuleDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -103,11 +103,11 @@ export const areaController = {
       {
         ...parsed.data,
         userId: req.user?.userId,
-      }
+      },
     );
 
     res.status(200).json({
-      message: "更新成功",
+      message: '更新成功',
       data,
     });
   },
@@ -122,7 +122,7 @@ export const areaController = {
   async listAreaPricingRules(req: Request, res: Response) {
     const data = await areaService.listAreaPricingRules();
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
@@ -132,9 +132,9 @@ export const areaController = {
     const parsed = CerateAreaResourceDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -146,7 +146,7 @@ export const areaController = {
     });
 
     res.status(201).json({
-      message: "创建成功",
+      message: '创建成功',
       data,
     });
   },
@@ -156,9 +156,9 @@ export const areaController = {
     const parsed = UpdateAreaResourceDTO.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
-        message: "参数验证失败",
-        data: parsed.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+        message: '参数验证失败',
+        data: parsed.error.issues.map(issue => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -170,7 +170,7 @@ export const areaController = {
     });
 
     res.status(200).json({
-      message: "更新成功",
+      message: '更新成功',
       data,
     });
   },
@@ -185,23 +185,23 @@ export const areaController = {
   async listAreaResources(req: Request, res: Response) {
     const data = await areaService.listAreaResources();
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data,
     });
   },
 
   /** 验证区域资源名称是否存在 */
   async isAreaResourceNameExists(req: Request, res: Response) {
-    const name = String(req.query.name || "");
+    const name = String(req.query.name || '');
     const areaResourceId = req.query.areaResourceId
       ? Number(req.query.areaResourceId)
       : undefined;
     const exists = await areaService.isAreaResourceNameExists(
       name,
-      areaResourceId
+      areaResourceId,
     );
     res.status(200).json({
-      message: "查询成功",
+      message: '查询成功',
       data: { exists },
     });
   },

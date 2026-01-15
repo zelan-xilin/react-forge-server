@@ -1,35 +1,24 @@
-import { STATUS } from "../../types/base";
+import { STATUS } from '../../types/base';
 
-export interface DictItemDTO {
+export interface DictDTO {
   id?: number;
   label: string;
   value: string;
-  sort?: number;
   status?: STATUS;
   description?: string | null;
 }
 
-export interface CreateDictWithChildrenDTO {
+export interface DictItemDTO {
+  id?: number;
+  parentId: number;
   label: string;
   value: string;
   sort?: number;
   status?: STATUS;
   description?: string | null;
-  children?: DictItemDTO[];
-  userId?: number;
 }
 
-export interface UpdateDictWithChildrenDTO {
-  label?: string;
-  value?: string;
-  sort?: number;
-  status?: STATUS;
-  description?: string | null;
-  children?: DictItemDTO[];
-  userId?: number;
-}
-
-export interface PageQueryDTO {
+export interface DictPageQueryDTO {
   label?: string;
   page: number;
   pageSize: number;
