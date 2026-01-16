@@ -28,6 +28,23 @@ function buildChildrenMap(children: DictItemDTO[]) {
   return map;
 }
 
+async function resolveSortForParent(parentId: number | null, sort?: number) {
+  if (sort !== -1) {
+    return sort;
+  }
+
+  const whereClause =
+    parentId === null ? isNull(dict.parentId) : eq(dict.parentId, parentId);
+  const rows = await db
+    .select({ sort: dict.sort })
+    .from(dict)
+    .where(whereClause)
+    .orderBy(desc(dict.sort))
+    .limit(1);
+  const maxSort = rows.length ? (rows[0].sort ?? 0) : 0;
+  return maxSort + 1;
+}
+
 export const dictService = {
   async createDict(data: DictDTO & { userId?: number }) {
     const existing = await db
@@ -194,13 +211,15 @@ export const dictService = {
   },
 
   async createItem(data: DictItemDTO & { userId?: number }) {
+    const sort = await resolveSortForParent(data.parentId ?? null, data.sort);
+
     return db
       .insert(dict)
       .values({
         parentId: data.parentId,
         label: data.label,
         value: data.value,
-        sort: data.sort,
+        sort: sort,
         status: data.status ?? STATUS.ENABLE,
         description: data.description,
         createdBy: data.userId,
@@ -212,12 +231,26 @@ export const dictService = {
     id: number,
     data: Partial<DictItemDTO> & { userId?: number },
   ) {
+    let newSort = data.sort;
+    if (newSort === -1) {
+      let parentId: number | null | undefined = data.parentId;
+      if (parentId === undefined) {
+        const existing = await db
+          .select({ parentId: dict.parentId })
+          .from(dict)
+          .where(eq(dict.id, id))
+          .limit(1);
+        parentId = existing.length ? existing[0].parentId : null;
+      }
+      newSort = await resolveSortForParent(parentId ?? null, -1);
+    }
+
     await db
       .update(dict)
       .set({
         label: data.label,
         value: data.value,
-        sort: data.sort,
+        sort: newSort,
         status: data.status,
         description: data.description,
         updatedBy: data.userId,
