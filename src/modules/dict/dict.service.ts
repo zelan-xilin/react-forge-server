@@ -30,6 +30,21 @@ function buildChildrenMap(children: DictItemDTO[]) {
 
 export const dictService = {
   async createDict(data: DictDTO & { userId?: number }) {
+    const existing = await db
+      .select()
+      .from(dict)
+      .where(
+        and(
+          isNull(dict.parentId),
+          or(eq(dict.label, data.label), eq(dict.value, data.value)),
+        ),
+      )
+      .limit(1);
+
+    if (existing.length) {
+      return existing;
+    }
+
     return db
       .insert(dict)
       .values({
