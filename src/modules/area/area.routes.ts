@@ -7,65 +7,28 @@ export const areaRoutes = Router();
 
 areaRoutes.use(authGuard);
 
-/** 新增区域收费规则 */
-areaRoutes.post(
-  '/rule',
-  permissionGuard('area-pricing-rule:create'),
-  areaController.createAreaPricingRule,
-);
-
-/** 更新区域收费规则 */
-areaRoutes.put(
-  '/rule/:id',
-  permissionGuard('area-pricing-rule:update'),
-  areaController.updateAreaPricingRule,
-);
-
-/** 删除区域收费规则 */
-areaRoutes.delete(
-  '/rule/:id',
-  permissionGuard('area-pricing-rule:delete'),
-  areaController.deleteAreaPricingRule,
-);
-
-/** 区域收费规则列表 */
-areaRoutes.get(
-  '/rule/list',
-  permissionGuard('area-pricing-rule:read'),
-  areaController.listAreaPricingRules,
-);
+/** 分页查询区域资源 */
+areaRoutes.get('/page', permissionGuard('area:read'), areaController.page);
 
 /** 新增区域资源 */
-areaRoutes.post(
-  '/resource',
-  permissionGuard('area-resource:create'),
-  areaController.createAreaResource,
-);
+areaRoutes.post('/', permissionGuard('area:create'), areaController.create);
 
 /** 更新区域资源 */
-areaRoutes.put(
-  '/resource/:id',
-  permissionGuard('area-resource:update'),
-  areaController.updateAreaResource,
-);
+areaRoutes.put('/:id', permissionGuard('area:update'), areaController.update);
 
 /** 删除区域资源 */
 areaRoutes.delete(
-  '/resource/:id',
-  permissionGuard('area-resource:delete'),
-  areaController.deleteAreaResource,
+  '/:id',
+  permissionGuard('area:delete'),
+  areaController.delete,
 );
 
 /** 区域资源列表 */
-areaRoutes.get(
-  '/resource/list',
-  permissionGuard('area-resource:read'),
-  areaController.listAreaResources,
-);
+areaRoutes.get('/list', permissionGuard('area:read'), areaController.list);
 
 /** 验证区域资源名称是否存在 */
 areaRoutes.get(
-  '/resource/exists',
-  permissionGuard('area-resource:read'),
-  areaController.isAreaResourceNameExists,
+  '/exists',
+  permissionGuard('area:read'),
+  areaController.isAreaNameExists,
 );

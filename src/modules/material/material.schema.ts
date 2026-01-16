@@ -1,12 +1,11 @@
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-export const area = sqliteTable('area', {
+export const material = sqliteTable('material', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull().unique(), // 包间001 / A-03
-  areaType: text('area_type').notNull(), // 'private_room' | 'hall_seat' | 'balcony'
-  roomSize: text('room_size'), // 'large' | 'medium' | 'small' | null
-  status: integer('status').notNull().default(1), // 1 启用 / 0 停用
+  name: text('name').notNull(),
+  recipeUnit: text('recipe_unit').notNull(),
+  status: integer('status').notNull().default(1),
   description: text('description'),
   createdBy: integer('created_by'),
   createdAt: integer('created_at', { mode: 'timestamp' })

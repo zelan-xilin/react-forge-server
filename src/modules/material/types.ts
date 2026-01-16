@@ -1,25 +1,22 @@
-export interface CreateAreaDTO {
+export interface CreateMaterialDTO {
   name: string;
-  areaType: string;
-  roomSize?: string;
+  recipeUnit: string;
   status?: number;
   description?: string;
   userId?: number;
 }
 
-export interface UpdateAreaDTO {
+export interface UpdateMaterialDTO {
   name?: string;
-  areaType?: string;
-  roomSize?: string | null;
+  recipeUnit?: string;
   status?: number;
   description?: string | null;
   userId?: number;
 }
 
-export interface UpdateAreaData {
+export interface UpdateMaterialData {
   name?: string;
-  areaType?: string;
-  roomSize?: string | null;
+  recipeUnit?: string;
   status?: number;
   description?: string | null;
   updatedBy?: number;

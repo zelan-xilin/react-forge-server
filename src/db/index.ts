@@ -59,18 +59,11 @@ export function initDb() {
       updated_at INTEGER
     );
 
-    CREATE TABLE IF NOT EXISTS area_pricing_rule (
+    CREATE TABLE IF NOT EXISTS area (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
       area_type TEXT NOT NULL,
       room_size TEXT,
-      time_type TEXT NOT NULL,
-      start_time_from TEXT NOT NULL,
-      base_duration_minutes INTEGER NOT NULL,
-      base_price REAL NOT NULL,
-      overtime_price_per_hour REAL NOT NULL,
-      overtime_rounding TEXT NOT NULL,
-      overtime_grace_minutes INTEGER DEFAULT 0,
-      gift_tea_amount REAL DEFAULT 0,
       status INTEGER DEFAULT 1,
       description TEXT,
       created_by INTEGER,
@@ -79,14 +72,81 @@ export function initDb() {
       updated_at INTEGER
     );
 
-    CREATE TABLE IF NOT EXISTS area_resource (
+    CREATE TABLE IF NOT EXISTS material (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
-      area_type TEXT NOT NULL,
-      room_size TEXT,
-      capacity INTEGER,
+      recipe_unit TEXT NOT NULL,
       status INTEGER DEFAULT 1,
       description TEXT,
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS recipe (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      status INTEGER DEFAULT 1,        -- 1 启用 / 0 停用
+      description TEXT,
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS recipe_item (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipe_id INTEGER NOT NULL,
+      material_id INTEGER NOT NULL,
+      amount REAL NOT NULL, 
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER,
+
+      UNIQUE (recipe_id, material_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS area_pricing (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      area_type TEXT NOT NULL,                  -- 区域类型（如：大厅 / 包间）
+      room_size TEXT,                        -- 包间大小
+      
+      rule_application_type TEXT NOT NULL,      -- 收费规则应用类型
+      apply_time_start TEXT NOT NULL,                 -- 应用时间起始
+      
+      usage_duration_hours REAL NOT NULL,             -- 使用时长（小时，起步时长）
+      base_price REAL NOT NULL,              -- 起步价格（元）
+      
+      overtime_hour_price REAL NOT NULL,              -- 超时每小时价格（元）
+      overtime_round_type TEXT NOT NULL,     -- 超时取整方式
+      overtime_grace_minutes INTEGER DEFAULT 0,  -- 超时宽限分钟
+      
+      gift_tea_amount REAL DEFAULT 0,         -- 赠送茶水金额（元）
+
+      status INTEGER DEFAULT 1,                  -- 1 启用 / 0 停用
+      description TEXT,
+
+      created_by INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_by INTEGER,
+      updated_at INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS product_pricing (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      product_id INTEGER NOT NULL,               -- 商品ID
+      price REAL NOT NULL,                     -- 价格（元）
+      
+      rule_application_type TEXT,      -- 收费规则应用类型
+      apply_time_start TEXT,                 -- 应用时间起始
+
+      status INTEGER DEFAULT 1,                   -- 1 启用 / 0 停用
+      description TEXT,
+
       created_by INTEGER,
       created_at INTEGER NOT NULL DEFAULT (unixepoch()),
       updated_by INTEGER,
