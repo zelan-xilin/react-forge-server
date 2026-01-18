@@ -5,8 +5,6 @@ import { productPricingService } from './pricing-product.service';
 const CreateProductPricingDTO = z.object({
   productId: z.number().min(1, '商品ID不能为空'),
   price: z.number().min(0, '价格必须大于等于0'),
-  ruleApplicationType: z.string().nullable().optional(),
-  applyTimeStart: z.string().nullable().optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200, '描述不能超过200个字符').optional(),
 });
@@ -14,8 +12,6 @@ const CreateProductPricingDTO = z.object({
 const UpdateProductPricingDTO = z.object({
   productId: z.number().optional(),
   price: z.number().min(0).optional(),
-  ruleApplicationType: z.string().nullable().optional(),
-  applyTimeStart: z.string().nullable().optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
 });

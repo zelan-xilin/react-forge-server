@@ -1,8 +1,8 @@
 export interface CreateAreaPricingDTO {
   areaType: string; // 区域类型
-  roomSize?: string; // 包间大小
-  ruleApplicationType: string; // 收费规则应用类型
+  roomSize?: string | null; // 包间大小
   applyTimeStart: string; // 应用时间起始（如 HH:mm）
+  applyTimeEnd: string; // 应用时间结束（如 HH:mm）
   usageDurationHours: number; // 使用时长（小时）
   basePrice: number; // 起步价格（元）
   overtimeHourPrice: number; // 超时每小时价格（元）
@@ -17,8 +17,8 @@ export interface CreateAreaPricingDTO {
 export interface UpdateAreaPricingDTO {
   areaType?: string;
   roomSize?: string | null;
-  ruleApplicationType?: string;
   applyTimeStart?: string;
+  applyTimeEnd?: string;
   usageDurationHours?: number;
   basePrice?: number;
   overtimeHourPrice?: number;
@@ -33,8 +33,8 @@ export interface UpdateAreaPricingDTO {
 export interface UpdateAreaPricingData {
   areaType?: string;
   roomSize?: string | null;
-  ruleApplicationType?: string;
   applyTimeStart?: string;
+  applyTimeEnd?: string;
   usageDurationHours?: number;
   basePrice?: number;
   overtimeHourPrice?: number;

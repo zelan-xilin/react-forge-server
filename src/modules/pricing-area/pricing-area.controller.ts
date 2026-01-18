@@ -4,9 +4,9 @@ import { areaPricingService } from './pricing-area.service';
 
 const CreateAreaPricingDTO = z.object({
   areaType: z.string().min(1, '区域类型不能为空'),
-  roomSize: z.string().optional(),
-  ruleApplicationType: z.string().min(1, '收费规则应用类型不能为空'),
+  roomSize: z.string().nullable().optional(),
   applyTimeStart: z.string().min(1, '应用时间起始不能为空'),
+  applyTimeEnd: z.string().min(1, '应用时间结束不能为空'),
   usageDurationHours: z.number().min(0, '使用时长必须大于0'),
   basePrice: z.number().min(0, '起步价格必须大于等于0'),
   overtimeHourPrice: z.number().min(0, '超时每小时价格必须大于等于0'),
@@ -20,8 +20,8 @@ const CreateAreaPricingDTO = z.object({
 const UpdateAreaPricingDTO = z.object({
   areaType: z.string().optional(),
   roomSize: z.string().nullable().optional(),
-  ruleApplicationType: z.string().optional(),
   applyTimeStart: z.string().optional(),
+  applyTimeEnd: z.string().optional(),
   usageDurationHours: z.number().min(0).optional(),
   basePrice: z.number().min(0).optional(),
   overtimeHourPrice: z.number().min(0).optional(),

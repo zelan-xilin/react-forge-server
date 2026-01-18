@@ -1,7 +1,7 @@
 export interface CreateAreaDTO {
   name: string;
   areaType: string;
-  roomSize?: string;
+  roomSize?: string | null;
   status?: number;
   description?: string;
   userId?: number;

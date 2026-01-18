@@ -8,7 +8,7 @@ const CreateAreaDTO = z.object({
     .min(1, '区域名称不能为空')
     .max(50, '区域名称不能超过50个字符'),
   areaType: z.string().min(1, '区域类型不能为空'),
-  roomSize: z.string().optional(),
+  roomSize: z.string().nullable().optional(),
   status: z.number().min(0).max(1).optional(),
   description: z.string().max(200, '描述不能超过200个字符').optional(),
 });

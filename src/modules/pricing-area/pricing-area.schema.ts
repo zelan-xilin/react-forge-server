@@ -7,8 +7,8 @@ export const areaPricing = sqliteTable('area_pricing', {
   areaType: text('area_type').notNull(), // 区域类型（大厅 / 包间）
   roomSize: text('room_size'), // 包间大小
 
-  ruleApplicationType: text('rule_application_type').notNull(), // 收费规则应用类型
   applyTimeStart: text('apply_time_start').notNull(), // 应用时间起始（如 HH:mm）
+  applyTimeEnd: text('apply_time_end').notNull(), // 应用时间结束（如 HH:mm）
 
   usageDurationHours: real('usage_duration_hours').notNull(), // 使用时长（小时）
   basePrice: real('base_price').notNull(), // 起步价格（元）

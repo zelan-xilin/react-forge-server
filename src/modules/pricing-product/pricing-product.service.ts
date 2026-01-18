@@ -1,6 +1,7 @@
 import { and, count, desc, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { db } from '../../db';
+import { recipe } from '../recipe/recipe.schema';
 import { user } from '../user/user.schema';
 import { productPricing } from './pricing-product.schema';
 import {
@@ -18,8 +19,6 @@ export const productPricingService = {
       .values({
         productId: data.productId,
         price: data.price,
-        ruleApplicationType: data.ruleApplicationType,
-        applyTimeStart: data.applyTimeStart,
         status: data.status,
         description: data.description,
         createdBy: data.userId,
@@ -41,12 +40,6 @@ export const productPricingService = {
     }
     if (data.price !== undefined) {
       updateData.price = data.price;
-    }
-    if (data.ruleApplicationType !== undefined) {
-      updateData.ruleApplicationType = data.ruleApplicationType;
-    }
-    if (data.applyTimeStart !== undefined) {
-      updateData.applyTimeStart = data.applyTimeStart;
     }
     if (data.status !== undefined) {
       updateData.status = data.status;
@@ -82,9 +75,28 @@ export const productPricingService = {
       .where(and(...conditions));
     const total = totalResult[0].count;
 
+    const creatorAlias = alias(user, 'creator');
+    const updaterAlias = alias(user, 'updater');
+    const productAlias = alias(recipe, 'product');
     const records = await db
-      .select()
+      .select({
+        id: productPricing.id,
+        productId: productPricing.productId,
+        productName: productAlias.name,
+        price: productPricing.price,
+        status: productPricing.status,
+        description: productPricing.description,
+        createdBy: productPricing.createdBy,
+        createdAt: productPricing.createdAt,
+        updatedBy: productPricing.updatedBy,
+        updatedAt: productPricing.updatedAt,
+        creatorName: creatorAlias.username,
+        updaterName: updaterAlias.username,
+      })
       .from(productPricing)
+      .leftJoin(creatorAlias, eq(productPricing.createdBy, creatorAlias.id))
+      .leftJoin(updaterAlias, eq(productPricing.updatedBy, updaterAlias.id))
+      .leftJoin(productAlias, eq(productPricing.productId, productAlias.id))
       .where(and(...conditions))
       .orderBy(desc(productPricing.createdAt))
       .limit(query.pageSize)
@@ -100,13 +112,13 @@ export const productPricingService = {
   list() {
     const creatorAlias = alias(user, 'creator');
     const updaterAlias = alias(user, 'updater');
+    const productAlias = alias(recipe, 'product');
     return db
       .select({
         id: productPricing.id,
         productId: productPricing.productId,
+        productName: productAlias.name,
         price: productPricing.price,
-        ruleApplicationType: productPricing.ruleApplicationType,
-        applyTimeStart: productPricing.applyTimeStart,
         status: productPricing.status,
         description: productPricing.description,
         createdBy: productPricing.createdBy,
@@ -119,6 +131,7 @@ export const productPricingService = {
       .from(productPricing)
       .leftJoin(creatorAlias, eq(productPricing.createdBy, creatorAlias.id))
       .leftJoin(updaterAlias, eq(productPricing.updatedBy, updaterAlias.id))
+      .leftJoin(productAlias, eq(productPricing.productId, productAlias.id))
       .orderBy(desc(productPricing.createdAt));
   },
 };

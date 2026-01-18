@@ -21,8 +21,8 @@ export const areaPricingService = {
       .values({
         areaType: data.areaType,
         roomSize: data.roomSize,
-        ruleApplicationType: data.ruleApplicationType,
         applyTimeStart: data.applyTimeStart,
+        applyTimeEnd: data.applyTimeEnd,
         usageDurationHours: data.usageDurationHours,
         basePrice: data.basePrice,
         overtimeHourPrice: data.overtimeHourPrice,
@@ -51,11 +51,11 @@ export const areaPricingService = {
     if (data.roomSize !== undefined) {
       updateData.roomSize = data.roomSize;
     }
-    if (data.ruleApplicationType !== undefined) {
-      updateData.ruleApplicationType = data.ruleApplicationType;
-    }
     if (data.applyTimeStart !== undefined) {
       updateData.applyTimeStart = data.applyTimeStart;
+    }
+    if (data.applyTimeEnd !== undefined) {
+      updateData.applyTimeEnd = data.applyTimeEnd;
     }
     if (data.usageDurationHours !== undefined) {
       updateData.usageDurationHours = data.usageDurationHours;
@@ -135,8 +135,8 @@ export const areaPricingService = {
         id: areaPricing.id,
         areaType: areaPricing.areaType,
         roomSize: areaPricing.roomSize,
-        ruleApplicationType: areaPricing.ruleApplicationType,
         applyTimeStart: areaPricing.applyTimeStart,
+        applyTimeEnd: areaPricing.applyTimeEnd,
         usageDurationHours: areaPricing.usageDurationHours,
         basePrice: areaPricing.basePrice,
         overtimeHourPrice: areaPricing.overtimeHourPrice,
