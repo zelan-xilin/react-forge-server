@@ -59,6 +59,7 @@ const UpdateOrderDTO = z.object({
   orderStatus: z.string().optional(),
   openedAt: z.string().nullable().optional(),
   closedAt: z.string().nullable().optional(),
+  expectedAmount: z.number().nullable().optional(),
   actualAmount: z.number().nullable().optional(),
   paymentDifferenceReason: z.string().nullable().optional(),
   remark: z.string().nullable().optional(),

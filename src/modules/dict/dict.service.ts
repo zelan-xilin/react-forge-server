@@ -29,7 +29,7 @@ function buildChildrenMap(children: DictItemDTO[]) {
 }
 
 async function resolveSortForParent(parentId: number | null, sort?: number) {
-  if (sort !== -1) {
+  if (sort !== 0) {
     return sort;
   }
 
@@ -232,7 +232,7 @@ export const dictService = {
     data: Partial<DictItemDTO> & { userId?: number },
   ) {
     let newSort = data.sort;
-    if (newSort === -1) {
+    if (newSort === 0) {
       let parentId: number | null | undefined = data.parentId;
       if (parentId === undefined) {
         const existing = await db
@@ -242,7 +242,7 @@ export const dictService = {
           .limit(1);
         parentId = existing.length ? existing[0].parentId : null;
       }
-      newSort = await resolveSortForParent(parentId ?? null, -1);
+      newSort = await resolveSortForParent(parentId ?? null, 0);
     }
 
     await db

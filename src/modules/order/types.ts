@@ -189,6 +189,7 @@ export interface UpdateOrderDTO {
   orderStatus?: ORDER_STATUS;
   openedAt?: string | null;
   closedAt?: string | null;
+  expectedAmount?: number | null;
   actualAmount?: number | null;
   paymentDifferenceReason?: string | null;
   remark?: string | null;
