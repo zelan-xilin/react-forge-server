@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../../db';
 import {
   salesOrder,
@@ -223,21 +223,18 @@ export const OrderService = {
         sql`exists (
       select 1 from ${salesOrderArea}
       where ${salesOrderArea.orderNo} = ${salesOrder.orderNo}
-      ${
-        params.areaName
-          ? sql`and ${salesOrderArea.areaName} like ${'%' + params.areaName + '%'}`
-          : sql``
-      }
-      ${
-        params.areaType
-          ? sql`and ${salesOrderArea.areaType} = ${params.areaType}`
-          : sql``
-      }
-      ${
-        params.roomSize
-          ? sql`and ${salesOrderArea.roomSize} = ${params.roomSize}`
-          : sql``
-      }
+      ${params.areaName
+            ? sql`and ${salesOrderArea.areaName} like ${'%' + params.areaName + '%'}`
+            : sql``
+          }
+      ${params.areaType
+            ? sql`and ${salesOrderArea.areaType} = ${params.areaType}`
+            : sql``
+          }
+      ${params.roomSize
+            ? sql`and ${salesOrderArea.roomSize} = ${params.roomSize}`
+            : sql``
+          }
     )`,
       );
 
@@ -257,16 +254,14 @@ export const OrderService = {
         sql`exists (
       select 1 from ${salesOrderReserved}
       where ${salesOrderReserved.orderNo} = ${salesOrder.orderNo}
-      ${
-        params.reservedUsername
-          ? sql`and ${salesOrderReserved.username} like ${'%' + params.reservedUsername + '%'}`
-          : sql``
-      }
-      ${
-        params.reservedContact
-          ? sql`and ${salesOrderReserved.contact} like ${'%' + params.reservedContact + '%'}`
-          : sql``
-      }
+      ${params.reservedUsername
+            ? sql`and ${salesOrderReserved.username} like ${'%' + params.reservedUsername + '%'}`
+            : sql``
+          }
+      ${params.reservedContact
+            ? sql`and ${salesOrderReserved.contact} like ${'%' + params.reservedContact + '%'}`
+            : sql``
+          }
     )`,
       );
     }
@@ -284,6 +279,7 @@ export const OrderService = {
       .select()
       .from(salesOrder)
       .where(and(...where))
+      .orderBy(desc(salesOrder.createdAt))
       .limit(params.pageSize)
       .offset((params.page - 1) * params.pageSize);
 
