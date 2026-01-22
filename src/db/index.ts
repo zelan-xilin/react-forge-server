@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import './schema';
 
-export const sqlite = new Database('rbac.db');
+export const sqlite = new Database(process.env.RBAC_DB_PATH || 'rbac.db');
 export const db = drizzle(sqlite);
 
 export function initDb() {
