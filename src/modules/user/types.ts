@@ -3,7 +3,7 @@ import { IS_ADMIN, STATUS } from '../../types/base';
 export interface CreateUserDTO {
   username: string;
   password: string;
-  roleId?: number;
+  roleId?: number | null;
   description?: string;
   status?: STATUS;
   userId?: number;

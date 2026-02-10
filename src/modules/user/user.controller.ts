@@ -12,7 +12,7 @@ const CreateUserDTO = z.object({
     .string()
     .min(6, '密码至少6个字符')
     .max(100, '密码不能超过100个字符'),
-  roleId: z.number().int().positive('角色ID必须为正整数').optional(),
+  roleId: z.number().int().positive('角色ID必须为正整数').optional().nullable(),
   description: z.string().max(200, '描述不能超过200个字符').optional(),
   status: z.number().int().min(0).max(1).optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
@@ -25,7 +25,7 @@ const CreateUserDTO = z.object({
 const UpdateUserDTO = z.object({
   username: z.string().min(3).max(50).optional(),
   password: z.string().min(6).max(100).optional(),
-  roleId: z.number().int().positive().nullable().optional(),
+  roleId: z.number().int().positive().nullable().optional().nullable(),
   status: z.number().int().min(0).max(1).optional(),
   description: z.string().max(200).nullable().optional(),
   isAdmin: z.number().int().min(0).max(1).optional(),
